@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Is anyone actually hiring for this? — RejectionIntel</title>
+<meta name="description" content="Paste a job advert and see whether it shows the patterns of a listing nobody is hiring for. Free, no signup.">
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('ri-theme');
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F7FB;--card:#FFFFFF;
+  --paper:#F7F7FB;--panel:#FFFFFF;
+  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
+  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+
+  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+
+  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
+  --t-insufficient:#78809A;
+  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+
+  --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
+  --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
+  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
+
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
+  --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
+  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+}
+[data-theme="dark"]{
+  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
+  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
+  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+
+  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+
+  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
+  --t-insufficient:#8891A6;
+  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
+  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+
+  --sem-strong:#3FC495;--sem-strong-bg:#10352A;
+  --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
+  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:10px}
+h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.035em;margin:0;line-height:1.1}
+
+.nav{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule)}
+.nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);
+  margin:0 auto;padding:0 26px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;
+  font-size:1.04rem;letter-spacing:-.03em;text-decoration:none;color:inherit}
+.brand-mark{width:28px;height:28px;border-radius:14px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--accent),var(--accent-2))}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.nav-right a{font-size:.88rem;color:var(--muted);text-decoration:none}
+.nav-right a:hover{color:var(--ink)}
+.theme-btn{width:36px;height:36px;border-radius:14px;border:1px solid var(--rule);
+  background:var(--panel);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;padding:0}
+.theme-btn svg{width:16px;height:16px}
+.theme-btn .moon{display:none}
+[data-theme="dark"] .theme-btn .moon{display:block}
+[data-theme="dark"] .theme-btn .sun{display:none}
+
+.wrap{max-width:var(--wrap);margin:0 auto;padding:44px 26px 90px}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);margin:0 0 10px}
+h1{font-size:clamp(2rem,4.4vw,2.9rem)}
+h1 em{font-style:normal;background:linear-gradient(120deg,var(--accent),var(--accent-2));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--ink-2);font-size:1.06rem;margin:16px 0 0;max-width:60ch;line-height:1.62}
+
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+  padding:26px;margin-top:30px}
+label{display:block;font-size:.82rem;font-weight:600;color:var(--ink-2);margin-bottom:7px}
+input,textarea{width:100%;padding:11px 13px;border-radius:14px;border:1px solid var(--rule);
+  background:var(--paper);color:var(--ink);font-family:var(--body);font-size:.92rem}
+textarea{min-height:190px;resize:vertical;line-height:1.6}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:640px){.row{grid-template-columns:1fr}}
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;
+  font-family:var(--body);font-weight:600;font-size:.95rem;padding:12px 26px;border-radius:14px;
+  cursor:pointer;margin-top:16px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:.87rem;color:var(--muted);margin-left:14px}
+.msg.err{color:var(--sem-maybe)}
+
+#out{display:none;margin-top:26px}
+.verdict{border-radius:14px;padding:24px 26px;margin-bottom:18px}
+.v-clean{background:var(--sem-strong-bg)}
+.v-some{background:var(--sem-maybe-bg)}
+.v-many{background:var(--sem-neg-bg)}
+.v-count{font-family:var(--display);font-size:2.5rem;font-weight:800;letter-spacing:-.045em;
+  line-height:1}
+.v-clean .v-count{color:var(--sem-strong)}
+.v-some .v-count{color:var(--sem-maybe)}
+.v-many .v-count{color:var(--sem-neg)}
+.v-label{font-size:.78rem;color:var(--muted);margin-top:5px}
+.v-text{font-size:1.02rem;color:var(--ink-2);margin-top:14px;line-height:1.6}
+.sig{display:grid;grid-template-columns:20px 1fr;gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--rule-soft)}
+.sig:last-child{border-bottom:0}
+.sig-dot{width:9px;height:9px;border-radius:50%;background:var(--sem-maybe);margin-top:7px}
+.sig-l{font-weight:600;font-size:.94rem}
+.sig-w{font-size:.87rem;color:var(--muted);margin-top:3px;line-height:1.55}
+.prior{background:var(--accent-soft);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+.prior b{color:var(--accent-ink)}
+.upsell{border:1px dashed var(--rule);border-radius:14px;padding:20px 22px;margin-top:20px}
+.upsell h3{font-family:var(--display);font-size:1.02rem;margin:0 0 8px}
+.upsell p{font-size:.92rem;color:var(--muted);margin:0 0 14px;line-height:1.6}
+.upsell a{color:var(--accent);font-weight:600;text-decoration:none;font-size:.92rem}
+.caveat{font-size:.86rem;color:var(--muted);margin-top:18px;line-height:1.6;
+  padding-top:16px;border-top:1px solid var(--rule-soft)}
+.context{display:flex;gap:22px;flex-wrap:wrap;margin-top:34px;font-size:.86rem;color:var(--muted)}
+.context div{flex:1;min-width:190px}
+.context b{display:block;font-family:var(--display);font-size:1.5rem;color:var(--ink);
+  letter-spacing:-.03em;margin-bottom:3px}
+
+/* ============================================================
+   BACKDROP — the same orb and aurora as the landing page
+   Lifted verbatim rather than reimplemented, so the free tool
+   doesn't quietly become a different product visually.
+   ============================================================ */
+
+
+
+
+
+
+
+/* Durations are deliberately co-prime-ish (23/31/19/37s) so the composite
+   pattern takes minutes to repeat rather than looping visibly. */
+
+
+
+
+
+
+
+
+
+
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] 
+
+/* Content sits above the backdrop, and panels go translucent so it shows
+   through instead of being covered by opaque rectangles. */
+.nav, .wrap{position:relative;z-index:1}
+.card{background:var(--panel);}
+.verdict, .prior, .upsell{}
+
+</style>
+<link rel="stylesheet" href="/backdrop.css">
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <span class="par" data-rate="-0.10"><span class="au au1"></span></span>
+  <span class="par" data-rate="-0.05"><span class="au au2"></span></span>
+  <span class="par" data-rate="-0.15"><span class="au au3"></span></span>
+  <span class="par" data-rate="-0.07"><span class="au au4"></span></span>
+  <span class="par" data-rate="-0.09"><span class="orb-breathe"><span class="orb"></span><span class="orb-ring"></span></span></span>
+</div>
+
+
+<!-- Parallax and keyframes live on separate elements: putting both on one
+     element would mean the scroll transform overwrites the animation. -->
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 14.5h10M10 6v8.5M6.5 6h7" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      RejectionIntel
+    </a>
+    <div class="nav-right">
+      <a href="/app">Analyse my search</a>
+      <a href="/cohort">Cohort</a>
+      <a href="/employers">Employers</a>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <p class="eyebrow">Free · no signup</p>
+  <h1>Is anyone actually hiring<br><em>for this one?</em></h1>
+  <p class="lede">
+    Somewhere between a fifth and a quarter of job adverts have no hiring process
+    behind them. Paste one below and we'll tell you which known patterns it shows —
+    before you spend an hour tailoring anything.
+  </p>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="company">Company <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input id="company" placeholder="e.g. Northwind Data" autocomplete="organization">
+      </div>
+      <div>
+        <label for="role">Job title <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <input id="role" placeholder="e.g. Backend Engineer">
+      </div>
+    </div>
+    <label for="jd">Paste the advert</label>
+    <textarea id="jd" placeholder="Paste the full job description here — the more of it, the better the check."></textarea>
+    <button class="btn" id="go" type="button">Check this advert</button>
+    <span class="msg" id="msg"></span>
+  </div>
+
+  <div id="out"></div>
+
+  <div class="context">
+    <div><b>18–27%</b>of online listings show no active hiring process behind them</div>
+    <div><b>53%</b>of job seekers were ghosted in the past year — a three-year high</div>
+    <div><b>80%</b>have applied somewhere and received no reply at all</div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+(function(){
+  $('themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('ri-theme', next); } catch(e){}
+  });
+})();
+
+function setMsg(t, err){ $('msg').textContent = t || ''; $('msg').className = 'msg' + (err ? ' err' : ''); }
+
+$('go').addEventListener('click', async () => {
+  const jd = $('jd').value.trim();
+  if (jd.length < 80) { setMsg('Paste a bit more of the advert — we need the body text.', true); return; }
+
+  $('go').disabled = true; setMsg('Checking…');
+  const fd = new FormData();
+  fd.append('jd_text', jd);
+  fd.append('company', $('company').value.trim());
+
+  try {
+    const res = await fetch('/api/ghost/check', {method:'POST', body:fd});
+    const d = await res.json();
+    if (!res.ok) { setMsg(d.detail || "Couldn't check that.", true); return; }
+    render(d);
+    setMsg('');
+  } catch (e) { setMsg("Couldn't reach the server.", true); }
+  finally { $('go').disabled = false; }
+});
+
+function render(d){
+  const l = d.listing;
+  if (!l.checked) { setMsg(l.note, true); return; }
+
+  const n = l.signals_found;
+  const tone = n === 0 ? 'clean' : (n <= 2 ? 'some' : 'many');
+
+  const prior = d.prior ? `
+    <div class="prior">
+      <b>${esc(d.prior.verdict)}</b>
+      ${d.prior.weight === 'strong'
+        ? ' That is the strongest signal on this page — it comes from what actually happened, not from reading the advert.'
+        : ''}
+    </div>` : '';
+
+  const upsell = d.upgrade_note ? `
+    <div class="upsell">
+      <h3>This only reads the advert</h3>
+      <p>${esc(d.upgrade_note)}</p>
+      <a href="/app">Analyse your applications &rarr;</a>
+    </div>` : '';
+
+  $('out').innerHTML = `
+    ${prior}
+    <div class="verdict v-${tone}">
+      <div class="v-count">${n}<span style="font-size:1.2rem;font-weight:600"> of ${l.signals_total}</span></div>
+      <div class="v-label">known ghost-listing patterns present</div>
+      <p class="v-text">${esc(l.verdict)}</p>
+    </div>
+    ${l.detail.length ? `<div class="card" style="margin-top:0">
+      ${l.detail.map(x => `
+        <div class="sig">
+          <span class="sig-dot"></span>
+          <div>
+            <div class="sig-l">${esc(x.label)}</div>
+            <div class="sig-w">${esc(x.why)}</div>
+          </div>
+        </div>`).join('')}
+      <p class="caveat">${esc(l.caveat)}</p>
+    </div>` : `<div class="card" style="margin-top:0">
+      <p style="margin:0;color:var(--ink-2)">None of the five patterns we check for
+      are present. That is not proof it is real — but nothing here says otherwise.</p>
+      <p class="caveat">${esc(l.caveat)}</p>
+    </div>`}
+    ${upsell}`;
+  $('out').style.display = 'block';
+  $('out').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+$('jd').addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') $('go').click();
+});
+
+/* Scroll parallax on the backdrop layers. Clamped, rAF-throttled, and skipped
+   entirely when reduced motion is requested. */
+(function(){
+  var layers = [].slice.call(document.querySelectorAll('.par'));
+  if(!layers.length) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var LIMIT = 300, ticking = false;
+
+  function apply(){
+    var y = window.scrollY || 0;
+    for(var i = 0; i < layers.length; i++){
+      var rate = parseFloat(layers[i].dataset.rate) || 0;
+      var off = Math.max(-LIMIT, Math.min(LIMIT, y * rate));
+      layers[i].style.transform = 'translate3d(0,' + off.toFixed(1) + 'px,0)';
+    }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ ticking = true; requestAnimationFrame(apply); }
+  }, {passive:true});
+  apply();
+})();
+</script>
+<script src="/backdrop.js"></script>
+</body>
+</html>

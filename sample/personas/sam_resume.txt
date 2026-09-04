@@ -1,0 +1,28 @@
+SAM OKONKWO
+Junior Developer | Remote
+sam.okonkwo@example.com | github.com/samokonkwo
+
+SUMMARY
+Recent computer science graduate looking for a first engineering role.
+Comfortable in Python, learning fast, and shipping side projects.
+
+EXPERIENCE
+
+Software Engineering Intern, Riverstone                      2025 - 2025
+- Helped with the internal admin tool used by the support team.
+- Worked on bug fixes across the Python backend.
+- Participated in code reviews with the platform team.
+
+Freelance, self-employed                                     2024 - 2025
+- Built three small websites for local businesses using HTML and CSS.
+- Wrote Python scripts to automate report generation for a client.
+
+PROJECTS
+- Personal finance tracker in Python with a Flask frontend.
+- A scraper that collects and charts local weather data daily.
+
+EDUCATION
+B.Sc Computer Science, University of Lagos, 2025
+
+SKILLS
+Python, Git, HTML/CSS, Flask, SQL basics

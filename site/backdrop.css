@@ -1,0 +1,62 @@
+/* RejectionIntel — the shared backdrop.
+ *
+ * Recovered from a served capture after a destructive edit. One file, linked
+ * by every page, so it can't drift into three copies again.
+ *
+ * THE STRUCTURAL RULE: the scroll transform and the keyframe animation live on
+ * DIFFERENT elements. Put both on one and the parallax overwrites the
+ * animation, so the orb stops spinning the moment the user scrolls.
+ */
+
+.stage{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:.72}
+.par{position:absolute;inset:0;will-change:transform}
+.orb-breathe{
+  position:absolute;inset:0;
+  animation:orbBreathe 13s ease-in-out infinite;
+}
+.orb{
+  position:absolute;top:-6%;right:4%;
+  width:clamp(380px,44vw,660px);aspect-ratio:1;border-radius:50%;
+  background:conic-gradient(from 0deg,#1B4670,#255C99,#3B7EBF,#79B4DE,#255C99,#1B4670);
+  filter:blur(58px);opacity:.46;
+  animation:orbSpin 38s linear infinite;
+}
+.orb::after{
+  content:"";position:absolute;inset:20%;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.85),transparent 62%);
+}
+.orb-ring{
+  position:absolute;top:-6%;right:4%;
+  width:clamp(380px,44vw,660px);aspect-ratio:1;border-radius:50%;
+  border:1.5px solid rgba(59,126,191,.22);
+  animation:orbBreathe 13s ease-in-out infinite reverse;
+}
+.au{position:absolute;border-radius:50%;filter:blur(84px);will-change:transform}
+.au1{width:46vw;height:40vw;right:22%;top:2%;background:radial-gradient(circle,rgba(37,92,153,.5),transparent 68%);animation:drift1 23s ease-in-out infinite}
+.au2{width:38vw;height:36vw;right:2%;top:38%;background:radial-gradient(circle,rgba(59,126,191,.46),transparent 68%);animation:drift2 31s ease-in-out infinite}
+.au3{width:32vw;height:30vw;right:38%;top:46%;background:radial-gradient(circle,rgba(90,169,230,.32),transparent 68%);animation:drift3 19s ease-in-out infinite}
+.au4{width:34vw;height:30vw;right:56%;top:-6%;background:radial-gradient(circle,rgba(127,192,240,.3),transparent 68%);animation:drift4 37s ease-in-out infinite}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+@keyframes orbBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-7%,5%) scale(1.14)}66%{transform:translate(5%,-4%) scale(.92)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(6%,-6%) scale(1.1)}75%{transform:translate(-5%,4%) scale(.95)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-8%,-5%) scale(1.18)}}
+@keyframes drift4{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(7%,7%) scale(1.12)}80%{transform:translate(-4%,-3%) scale(.96)}}
+[data-theme="dark"] .orb{opacity:.58}
+[data-theme="dark"] .orb::after{background:radial-gradient(circle at 34% 30%,rgba(175,210,240,.55),transparent 62%)}
+[data-theme="dark"] .orb-ring{border-color:rgba(127,192,240,.18)}
+
+@media (prefers-reduced-motion:reduce){
+  .orb,.orb-ring,.orb-breathe,.au{animation:none}
+}
+@media(max-width:980px){.orb,.orb-ring{right:-14%;top:-14%}.au{filter:blur(58px)}}
+[data-theme="dark"] .stage{opacity:.82}
+[data-theme="dark"] .au{opacity:.9}
+
+/* Content above the backdrop; panels translucent so the orb shows through
+ * rather than being hidden behind opaque rectangles. */
+.nav,.wrap,header,main,footer{position:relative;z-index:1}
+.panel,.card,.col,.pf,.kpi{
+  background:color-mix(in srgb,var(--panel) 88%,transparent);
+  backdrop-filter:blur(14px) saturate(1.3);
+}

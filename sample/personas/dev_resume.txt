@@ -1,0 +1,35 @@
+DEV SHARMA
+Staff Software Engineer | Bengaluru, India
+dev.sharma@example.com | +91 90909 10101 | github.com/devsharma
+
+SUMMARY
+Staff engineer with eleven years on distributed backend systems. Spend most of
+my time on architecture, review and unblocking other teams.
+
+EXPERIENCE
+
+Staff Engineer, NorthPeak Systems                            2021 - present
+- Led the migration of nineteen services to Kubernetes, cutting deploy time from
+  50 minutes to 6 and halving infrastructure spend.
+- Designed the event backbone on Kafka now carrying 2.4 million events an hour.
+- Owned the system design review process across four teams.
+- Cut p99 latency on the core read path from 900ms to 120ms.
+- Mentored six engineers, three of whom were promoted to senior.
+
+Senior Backend Engineer, Ironvale                            2017 - 2021
+- Built the multi-region failover for the transaction service, taking recovery
+  from 40 minutes to under 90 seconds.
+- Rewrote the batch pipeline in Go, cutting nightly runtime from 6 hours to 40
+  minutes.
+- Introduced the on-call runbook process still in use.
+
+Backend Engineer, Falconry                                   2015 - 2017
+- Shipped the public API used by 200 partner integrations.
+- Moved the deployment pipeline to Docker and automated release verification.
+
+EDUCATION
+B.E. Computer Science, BITS Pilani, 2014
+
+SKILLS
+Java, Go, Kubernetes, AWS, Kafka, Docker, System Design, SQL, PostgreSQL,
+Terraform, gRPC, Distributed Systems

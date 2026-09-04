@@ -1,0 +1,42 @@
+PRIYA RAGHAVAN
+Senior Product Manager | Bengaluru, India
+priya.raghavan@example.com | +91 98765 43210 | linkedin.com/in/priyaraghavan
+
+SUMMARY
+Product manager with six years building B2B SaaS platforms. Strongest on
+discovery, roadmap ownership and shipping with distributed engineering teams.
+
+EXPERIENCE
+
+Senior Product Manager, Corvus Systems                       2022 - present
+- Owned the billing platform roadmap across three engineering teams, shipping
+  a usage-based pricing model that lifted expansion revenue by 18%.
+- Ran A/B Testing on the checkout funnel across four iterations, improving
+  completion from 61% to 74%.
+- Partnered with design in Figma on a full surface redesign, cutting support
+  tickets about invoicing by a third.
+- Managed sprint planning in Jira using Agile ceremonies for a team of 14.
+- Led Stakeholder Management across sales, finance and support during a
+  six-month migration affecting 2,300 accounts.
+
+Product Manager, Riverstone                                  2019 - 2022
+- Shipped a self-serve onboarding flow for SMB customers, taking time-to-first
+  value from 9 days to under 2.
+- Drove Roadmapping and quarterly planning for the platform group.
+- Defined API Design standards with engineering for the partner integrations
+  programme, onboarding 40 partners in the first year.
+- Ran weekly business reviews with the commercial team.
+
+Associate Product Manager, Kettle & Co                       2018 - 2019
+- Supported discovery and requirements for the partner integrations team.
+- Wrote specs and acceptance criteria for two major releases.
+
+EDUCATION
+B.E. Computer Science, Visvesvaraya Technological University, 2018
+
+SKILLS
+Roadmapping, A/B Testing, Figma, Jira, Agile, Stakeholder Management,
+API Design, SQL, Excel
+
+CERTIFICATIONS
+Certified Scrum Product Owner (CSPO), 2021

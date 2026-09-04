@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RejectionIntel — analytics for your job search</title>
+<meta name="description" content="Upload your application history. See where you actually lose, with the uncertainty shown. No invented rejection reasons, no predicted lift.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%235A47E0'/><path d='M9 22h14M16 10v12M12 10h8' stroke='white' stroke-width='2.4' stroke-linecap='round'/></svg>">
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('ri-theme');
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   Accent is indigo→violet. The four tier colours still carry
+   meaning — strong findings use the accent itself, so the brand
+   colour and "this is trustworthy" are the same signal.
+   ============================================================ */
+:root{
+  --bg:#F7F7FB;--card:#FFFFFF;
+  --paper:#F7F7FB;--panel:#FFFFFF;
+  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
+  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+
+  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+
+  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
+  --t-insufficient:#78809A;
+  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+
+  --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
+  --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
+  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
+
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
+  --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
+  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--body);font-size:17px;line-height:1.62;
+  font-feature-settings:"cv05","ss03";
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:10px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px}
+
+h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.032em;line-height:1.04;margin:0}
+h1{font-size:clamp(2.3rem,4.6vw,3.65rem);text-wrap:balance}
+h2{font-size:clamp(1.95rem,3.8vw,2.85rem)}
+h3{font-size:1.1rem;font-weight:700;letter-spacing:-.016em;line-height:1.32}
+
+.eyebrow{
+  font-size:.75rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);margin:0 0 16px;
+}
+.lede{font-size:1.1rem;line-height:1.72;color:var(--ink-2);max-width:60ch;margin:18px 0 0}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+.nav{position:sticky;top:0;z-index:80;background:rgba(247,247,251,.82);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;gap:0;height:72px;max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:1.09rem;letter-spacing:-.032em;text-decoration:none}
+.brand-mark{width:29px;height:29px;border-radius:14px;background:linear-gradient(140deg,var(--accent) 0%,var(--accent-2) 100%);display:grid;place-items:center;flex:none;box-shadow:0 3px 10px -3px rgba(37,92,153,.6)}
+/* Page anchors. Pushed right by auto, then a fixed run-in to the tools. */
+.nav-links{display:flex;gap:26px;margin-left:auto;font-size:.92rem;font-weight:500;
+  white-space:nowrap}
+.nav-tools{display:flex;gap:22px;font-size:.92rem;font-weight:500;white-space:nowrap;
+  margin-right:20px}
+.nav-tools a{color:var(--ink-2);text-decoration:none;transition:color .15s}
+.nav-tools a:hover{color:var(--accent)}
+/* A hairline instead of a wider gap: at these lengths a gap alone reads as
+   accidental spacing rather than a deliberate grouping. */
+.nav-sep{width:1px;height:20px;background:var(--line);margin:0 22px;flex:none}
+.theme-btn{margin-right:14px}
+
+/* Below 1240px the anchors go first — they duplicate the page you're already
+   on. The tools are separate destinations and survive one breakpoint longer. */
+@media(max-width:1240px){.nav-links,.nav-sep{display:none}}
+@media(max-width:860px){.nav-tools{display:none}}
+.nav-links a{color:var(--ink-2);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{
+  background:var(--ink);color:#fff;text-decoration:none;padding:10px 20px;border-radius:14px;
+  font-size:.91rem;font-weight:600;white-space:nowrap;transition:transform .15s,box-shadow .15s;
+}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 18px -8px rgba(14,16,23,.6)}
+@media(max-width:900px){.nav-links{display:none}.nav-cta{margin-left:auto}}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{position:relative;z-index:1;padding:60px 0 52px}
+
+/* ---------- the orb: slow-rotating conic gradient, softly breathing ---------- */
+
+/* ---------- aurora: blurred washes on independent, non-repeating cycles ----------
+   Durations are deliberately co-prime-ish (23/31/19/37s) so the composite
+   pattern takes minutes to repeat instead of looping visibly. */
+
+.hero-grid{position:relative;z-index:2;display:grid;grid-template-columns:1.03fr .97fr;gap:64px;align-items:center}
+@media(max-width:980px){.hero-grid{grid-template-columns:1fr;gap:40px}.hero{padding:44px 0 40px}}
+.pill{
+  display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);
+  padding:7px 15px 7px 9px;border-radius:14px;font-size:.83rem;font-weight:500;color:var(--ink-2);
+  margin-bottom:20px;box-shadow:0 1px 2px rgba(14,16,23,.04);
+}
+.pill b{color:var(--accent-ink);font-weight:650}
+.pill-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;box-shadow:0 0 0 4px var(--accent-soft)}
+
+.hero h1 em{
+  font-style:normal;
+  background:linear-gradient(96deg,var(--accent) 8%,var(--accent-2) 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-sub{font-size:1.1rem;line-height:1.65;color:var(--ink-2);max-width:46ch;margin:20px 0 0}
+.hero-actions{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:28px}
+.btn-primary{
+  background:linear-gradient(140deg,var(--accent) 0%,var(--accent-2) 115%);color:#fff;
+  text-decoration:none;font-weight:600;font-size:1rem;padding:15px 30px;border-radius:14px;
+  display:inline-block;box-shadow:0 10px 24px -10px rgba(37,92,153,.75);transition:transform .16s,box-shadow .16s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 32px -12px rgba(37,92,153,.85)}
+.btn-ghost{
+  background:transparent;border:1.5px solid var(--line);color:var(--ink-2);text-decoration:none;
+  font-weight:550;font-size:1rem;padding:13.5px 26px;border-radius:14px;display:inline-block;transition:border-color .16s,color .16s;
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.hero-note{font-size:.85rem;color:var(--muted);margin-top:18px;line-height:1.6}
+
+/* ---------- funnel card ---------- */
+.card-funnel{
+  background:var(--card);border:1px solid rgba(255,255,255,.7);border-radius:var(--r-lg);
+  padding:22px 26px 20px;box-shadow:var(--shadow);
+}
+.cf-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line-2)}
+.cf-title{font-family:var(--display);font-weight:700;font-size:1.02rem;letter-spacing:-.018em}
+.cf-badge{font-size:.76rem;font-weight:550;color:var(--accent-ink);background:var(--accent-soft);padding:5px 11px;border-radius:14px;white-space:nowrap}
+
+.frow{display:grid;grid-template-columns:1fr auto;gap:6px 18px;align-items:baseline;padding:15px 0;border-bottom:1px solid var(--line-2)}
+.frow:last-of-type{border-bottom:0}
+.flabel{font-size:.94rem;font-weight:500;color:var(--ink-2)}
+.fnum{font-family:var(--display);font-size:1.5rem;font-weight:800;letter-spacing:-.038em;text-align:right;line-height:1}
+.fci{grid-column:2;font-size:.76rem;color:var(--muted);text-align:right;margin-top:2px}
+
+/* the signature: solid bar to the observed value, translucent
+   continuation to the top of the confidence interval */
+.track{grid-column:1/-1;position:relative;height:16px;background:#EFF1F7;border-radius:14px;margin-top:12px;overflow:hidden}
+.fill{position:absolute;top:0;bottom:0;left:0;border-radius:14px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 1px 3px rgba(37,92,153,.4)}
+.fill.zero{background:var(--t-none);opacity:.45;min-width:5px}
+
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.fill{transform-origin:left center;animation:grow .72s cubic-bezier(.19,.9,.28,1) both}
+
+/* ============================================================
+   TIER STRIP
+   ============================================================ */
+.tiers{position:relative;z-index:1;padding:44px 0;background:color-mix(in srgb,var(--card) 80%,transparent);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tiers-intro{font-size:1rem;color:var(--ink-2);max-width:66ch;margin:0 0 26px}
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:860px){.tier-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.tier-grid{grid-template-columns:1fr}}
+.tier{border:1px solid var(--line);border-radius:var(--r);padding:20px 21px;background:var(--bg)}
+.tier-name{display:flex;align-items:center;gap:9px;font-size:.79rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.tier-dot{width:9px;height:9px;border-radius:3px;flex:none}
+.tier p{font-size:.9rem;color:var(--muted);margin:11px 0 0;line-height:1.55}
+
+/* ============================================================
+   SECTIONS
+   ============================================================ */
+.sec{position:relative;z-index:1;padding:88px 0}
+.sec-alt{background:color-mix(in srgb,var(--card) 80%,transparent);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sec-head{max-width:62ch;margin-bottom:44px}
+
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+@media(max-width:940px){.cards{grid-template-columns:1fr}}
+.card{background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(14,16,23,.04),0 10px 26px -18px rgba(14,16,23,.18);transition:transform .18s,box-shadow .18s}
+.card:hover{transform:translateY(-3px);box-shadow:0 1px 2px rgba(14,16,23,.04),0 20px 40px -20px rgba(14,16,23,.26)}
+.sec-alt .card{background:var(--bg)}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.tag{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:5px 11px;border-radius:14px}
+.tag-observed{background:var(--bg-observed);color:var(--t-observed)}
+.tag-strong{background:var(--bg-strong);color:var(--t-strong)}
+.tag-none{background:var(--bg-none);color:var(--t-none)}
+.card-q{font-size:.76rem;color:var(--muted)}
+.card p{font-size:.95rem;color:var(--ink-2);margin:13px 0 0;line-height:1.62}
+.arms{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2)}
+.arm-l{font-size:.76rem;color:var(--muted);font-weight:500}
+.arm-v{font-family:var(--display);font-size:1.95rem;font-weight:800;letter-spacing:-.04em;display:block;margin-top:3px;line-height:1}
+.arm-ci{font-size:.73rem;color:var(--muted)}
+.card-do{margin-top:auto;padding-top:18px;font-size:.9rem;color:var(--ink);border-top:1px solid var(--line-2);line-height:1.55}
+.card-do b{font-weight:650;color:var(--accent-ink)}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+@media(max-width:880px){.steps{grid-template-columns:1fr}}
+.step{background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px 26px}
+.sec-alt .step{background:var(--bg)}
+.step-n{width:34px;height:34px;border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:.95rem;margin-bottom:18px}
+.step p{font-size:.93rem;color:var(--muted);margin:11px 0 0;line-height:1.6}
+.step code{font-size:.84rem;background:var(--accent-soft);color:var(--accent-ink);padding:2px 7px;border-radius:5px;font-weight:500}
+
+/* math block */
+.math{background:linear-gradient(155deg,#14162A 0%,#1D1B3E 55%,#241F4C 100%);color:#D9DCEC;border-radius:var(--r-lg);padding:52px 50px;position:relative;overflow:hidden}
+@media(max-width:720px){.math{padding:34px 26px}}
+.math::after{content:"";position:absolute;width:520px;height:520px;right:-14%;top:-32%;background:radial-gradient(circle,rgba(59,126,191,.36),transparent 66%);filter:blur(52px)}
+.math > *{position:relative;z-index:1}
+.math .eyebrow{color:#A99BFF}
+.math h2{color:#fff;max-width:20ch}
+.math-body{font-size:1.06rem;color:#AEB4CE;max-width:62ch;margin:20px 0 0;line-height:1.72}
+.math-figs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:38px}
+@media(max-width:760px){.math-figs{grid-template-columns:1fr}}
+.mfig{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:24px}
+.mfig-n{font-family:var(--display);font-size:2.5rem;font-weight:800;color:#fff;letter-spacing:-.045em;line-height:1}
+.mfig-l{font-size:.88rem;color:#9AA1BE;margin-top:11px;line-height:1.5}
+.math-foot{font-size:.85rem;color:#7F87A6;margin-top:28px;line-height:1.65}
+.math-foot code{color:#C7BCFF;background:rgba(59,126,191,.14);padding:2px 7px;border-radius:5px}
+
+/* comparison */
+.cmp-wrap{background:color-mix(in srgb,var(--card) 93%,transparent);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 1px 2px rgba(14,16,23,.04),0 12px 30px -22px rgba(14,16,23,.2)}
+.cmp{width:100%;border-collapse:collapse;font-size:.94rem}
+.cmp th,.cmp td{padding:16px 20px;text-align:left;border-bottom:1px solid var(--line-2)}
+.cmp thead th{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;background:var(--bg)}
+.cmp thead th:nth-child(2){color:var(--accent-ink);background:var(--accent-soft)}
+.cmp td:nth-child(2){background:rgba(238,235,254,.42);font-weight:550}
+.cmp tbody tr:last-child td{border-bottom:0}
+.cmp td:first-child{color:var(--ink-2);width:42%}
+.yes{color:var(--t-observed);font-weight:650}
+.no{color:var(--muted)}
+.warn{color:var(--t-weak);font-weight:600}
+.cmp-scroll{overflow-x:auto}
+.cmp-note{font-size:.85rem;color:var(--muted);margin-top:16px}
+
+/* pricing */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start}
+@media(max-width:940px){.plans{grid-template-columns:1fr}}
+.plan{background:color-mix(in srgb,var(--card) 92%,transparent);border:1px solid var(--line);border-radius:var(--r-lg);padding:30px;display:flex;flex-direction:column}
+.plan-hi{border:1.5px solid var(--accent);box-shadow:0 20px 46px -26px rgba(37,92,153,.6);position:relative}
+.plan-flag{position:absolute;top:-12px;left:30px;background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 13px;border-radius:14px}
+.plan-name{font-size:.77rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.plan-price{font-family:var(--display);font-size:2.7rem;font-weight:800;letter-spacing:-.045em;margin:14px 0 6px;line-height:1}
+.plan-price span{font-family:var(--body);font-size:.95rem;font-weight:400;color:var(--muted);letter-spacing:0}
+.plan-for{font-size:.9rem;color:var(--muted);margin:0 0 22px;padding-bottom:22px;border-bottom:1px solid var(--line-2);line-height:1.55}
+.plan ul{list-style:none;padding:0;margin:0 0 26px;font-size:.92rem;color:var(--ink-2)}
+.plan li{padding:7px 0 7px 26px;position:relative}
+.plan li::before{content:"";position:absolute;left:0;top:15px;width:14px;height:8px;border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(-45deg)}
+.plan-hi li::before{border-color:var(--accent)}
+.plan .btn-primary,.plan .btn-ghost{margin-top:auto;text-align:center;font-size:.95rem;padding:13px 22px}
+
+/* faq */
+.faq{max-width:76ch}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;list-style:none;padding:22px 40px 22px 0;position:relative;font-family:var(--display);font-weight:700;font-size:1.06rem;letter-spacing:-.018em}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";position:absolute;right:8px;top:29px;width:11px;height:11px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(-135deg);border-color:var(--accent)}
+.faq details p{margin:0 0 24px;font-size:.97rem;color:var(--ink-2);max-width:68ch;line-height:1.7}
+
+/* close */
+.close{position:relative;z-index:1;padding:96px 0}
+.close-box{background:linear-gradient(155deg,#14162A 0%,#241F4C 100%);border-radius:var(--r-lg);padding:66px 50px;text-align:center;position:relative;overflow:hidden}
+@media(max-width:640px){.close-box{padding:44px 26px}}
+.close-box::after{content:"";position:absolute;width:640px;height:640px;left:50%;top:52%;transform:translateX(-50%);background:radial-gradient(circle,rgba(59,126,191,.34),transparent 64%);filter:blur(56px)}
+.close-box > *{position:relative;z-index:1}
+.close-box h2{color:#fff;max-width:18ch;margin:0 auto}
+.close-box p{color:#A9B0CC;max-width:52ch;margin:22px auto 0;font-size:1.05rem;line-height:1.7}
+.close-box .hero-actions{justify-content:center}
+.close-box .btn-ghost{border-color:rgba(255,255,255,.24);color:#D9DCEC}
+.close-box .btn-ghost:hover{border-color:#fff;color:#fff}
+.close-box .hero-note{color:#7F87A6}
+
+footer{position:relative;z-index:1;padding:52px 0 60px;border-top:1px solid var(--line)}
+.foot-top{display:flex;flex-wrap:wrap;gap:28px;justify-content:space-between;align-items:flex-start}
+.foot-links{display:flex;flex-wrap:wrap;gap:26px;font-size:.9rem}
+.foot-links a{color:var(--muted);text-decoration:none}
+.foot-links a:hover{color:var(--accent)}
+.foot-fine{font-size:.83rem;color:var(--muted);margin-top:32px;padding-top:26px;border-top:1px solid var(--line);line-height:1.7;max-width:88ch}
+
+/* ============================================================
+   DARK MODE
+   Not an inversion. On dark, the indigo accent is lightened so it
+   keeps its contrast ratio against a near-black card, and the four
+   tier colours are re-picked rather than reused — an amber that
+   reads "caution" on white reads muddy on #14161F.
+   ============================================================ */
+[data-theme="dark"]{
+  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
+  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
+  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+
+  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+
+  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
+  --t-insufficient:#8891A6;
+  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
+  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+
+  --sem-strong:#3FC495;--sem-strong-bg:#10352A;
+  --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
+  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
+  color-scheme:dark;
+}
+[data-theme="dark"] .nav{background:rgba(10,11,17,.82);}
+[data-theme="dark"] .nav-cta{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#0A0B11}
+[data-theme="dark"] .track,[data-theme="dark"] .bar{background:#1F2431}
+[data-theme="dark"] .card-funnel{border-color:var(--line)}
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] 
+[data-theme="dark"] .math,[data-theme="dark"] .close-box{
+  background:linear-gradient(155deg,#15172A 0%,#1C1A38 55%,#221D46 100%);
+  border:1px solid var(--line);
+}
+[data-theme="dark"] .cmp thead th{background:#1A1D28}
+[data-theme="dark"] .cmp td:nth-child(2){background:rgba(139,123,255,.07)}
+[data-theme="dark"] .cmp thead th:nth-child(2){background:var(--accent-soft)}
+[data-theme="dark"] .sec-alt .card,[data-theme="dark"] .sec-alt .step,[data-theme="dark"] .tier{background:#0F1118}
+[data-theme="dark"] .step code,[data-theme="dark"] .plan li::before{border-color:var(--accent)}
+[data-theme="dark"] input[type=file],[data-theme="dark"] textarea,[data-theme="dark"] .drop{
+  background:#0F1118;color:var(--ink);border-color:var(--line);
+}
+[data-theme="dark"] .fill.zero{background:var(--t-none)}
+
+/* toggle */
+.theme-btn{
+  width:38px;height:38px;border-radius:14px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink-2);cursor:pointer;flex:none;
+  display:grid;place-items:center;transition:color .15s,border-color .15s;padding:0;
+}
+.theme-btn:hover{color:var(--accent);border-color:var(--accent)}
+.theme-btn svg{width:17px;height:17px}
+.theme-btn .moon{display:none}
+[data-theme="dark"] .theme-btn .moon{display:block}
+[data-theme="dark"] .theme-btn .sun{display:none}
+
+/* ============================================================
+   MARQUEE — infinite loop, driven by scroll
+   Position is advanced in requestAnimationFrame rather than by a
+   CSS animation, because scroll velocity has to feed into it:
+   idle = slow drift, scrolling down = speeds up, scrolling up =
+   reverses. A CSS keyframe animation can't be steered that way.
+   ============================================================ */
+.band{
+  position:relative;z-index:1;padding:26px 0;background:color-mix(in srgb,var(--card) 84%,transparent);
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;
+}
+.band-label{
+  display:block;text-align:center;font-size:.74rem;font-weight:600;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:22px;
+}
+.band::before,.band::after{
+  content:"";position:absolute;top:0;bottom:0;width:130px;z-index:2;pointer-events:none;
+}
+.band::before{left:0;background:linear-gradient(90deg,var(--card),transparent);opacity:.85}
+.band::after{right:0;background:linear-gradient(270deg,var(--card),transparent);opacity:.85}
+
+.marquee{overflow:hidden;display:flex}
+.marquee + .marquee{margin-top:14px}
+.mq-track{display:flex;width:max-content;will-change:transform}
+.mq-set{display:flex;gap:14px;padding-right:14px;flex:none}
+
+.chip{
+  display:inline-flex;align-items:center;gap:10px;white-space:nowrap;flex:none;
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg));
+  border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);
+  border-radius:14px;
+  padding:11px 20px 11px 16px;font-size:.94rem;color:var(--accent-ink);
+}
+.chip::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);
+  opacity:.5;flex:none;
+/* Every chip is identical, deliberately. An earlier version highlighted the one
+   that says something useful, but singling it out visually did the reader's work
+   for them — and the caption then had to point at a colour. Uniform chips make
+   the wall read as a wall, and the reader finds the exception by reading it. */
+}
+.band-foot{
+  text-align:center;font-size:.88rem;color:var(--muted);margin:24px auto 0;max-width:60ch;line-height:1.6;
+}
+.band-foot b{color:var(--ink-2);font-weight:600}
+
+/* scroll reveal */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.8,.3,1),transform .7s cubic-bezier(.2,.8,.3,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+}
+/* icon on the secondary CTA */
+.btn-icon{display:inline-flex;align-items:center;gap:9px}
+.btn-icon svg{width:18px;height:18px;flex:none;transition:transform .18s ease}
+.btn-icon:hover svg{transform:scale(1.12)}
+
+/* the one thing the card asserts: where it breaks */
+.flabel-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.insight{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:.7rem;font-weight:650;letter-spacing:.02em;
+  padding:3px 10px;border-radius:14px;white-space:nowrap;
+  background:var(--bg-weak);color:var(--t-weak);
+}
+.insight::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--t-weak);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.insight::before{animation:none}}
+}
+[data-theme="dark"] .insight{background:rgba(224,169,58,.16)}
+
+/* ============================================================
+   VERIFIABLE CLAIMS
+   Every marketing claim on this page should come with a way to
+   check it. A product whose whole argument is "we don't overclaim"
+   has no business asking to be taken on faith.
+   ============================================================ */
+.proof{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:880px){.proof{grid-template-columns:1fr}}
+.pf{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:26px;display:flex;flex-direction:column}
+.sec-alt .pf{background:var(--bg)}
+.pf-tick{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;
+  background:var(--bg-observed);color:var(--t-observed);flex:none;margin-bottom:14px}
+.pf-tick svg{width:13px;height:13px}
+.pf h3{font-size:1.04rem;margin-bottom:9px}
+.pf p{font-size:.93rem;color:var(--ink-2);margin:0;line-height:1.62}
+.pf-how{margin-top:auto;padding-top:16px;border-top:1px solid var(--line-2);
+  font-size:.84rem;color:var(--muted);line-height:1.55}
+.pf-how b{color:var(--ink-2);font-weight:600}
+.pf-how code{background:var(--accent-soft);color:var(--accent-ink);padding:2px 7px;
+  border-radius:5px;font-size:.83rem}
+
+/* ---------- what actually happened to them ----------
+   Drawn on its own 0-100% scale. These are shares of every application, not
+   funnel conversions, and squeezing 63% onto the funnel's 25% axis would
+   either clip the bar or quietly rescale the ones above it. */
+.outcomes{margin-top:18px;padding-top:16px;border-top:1px solid var(--line-2)}
+.oc-t{font-size:.7rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px}
+.oc-row{display:grid;grid-template-columns:1fr auto;gap:4px 14px;margin-bottom:11px}
+.oc-row:last-child{margin-bottom:0}
+.oc-l{font-size:.85rem;color:var(--ink-2)}
+.oc-n{font-size:.85rem;font-weight:600;font-variant-numeric:tabular-nums}
+.oc-track{grid-column:1/-1;height:9px;border-radius:14px;background:#EFF1F7;overflow:hidden}
+[data-theme="dark"] .oc-track{background:#1F2431}
+.oc-fill{height:100%;border-radius:14px;transform-origin:left center;
+  animation:grow .8s cubic-bezier(.19,.9,.28,1) both}
+.oc-reply{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.oc-rej{background:var(--t-weak)}
+.oc-none{background:var(--t-none)}
+.oc-note{font-size:.79rem;color:var(--muted);margin-top:14px;line-height:1.55}
+.oc-note b{color:var(--ink-2);font-weight:600</style>
+<link rel="stylesheet" href="/backdrop.css">
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <span class="par" data-rate="-0.10"><span class="au au1"></span></span>
+  <span class="par" data-rate="-0.05"><span class="au au2"></span></span>
+  <span class="par" data-rate="-0.15"><span class="au au3"></span></span>
+  <span class="par" data-rate="-0.07"><span class="au au4"></span></span>
+  <span class="par" data-rate="-0.09"><span class="orb-breathe"><span class="orb"></span><span class="orb-ring"></span></span></span>
+</div>
+
+
+<!-- Site-wide animated backdrop. Fixed, behind everything, pointer-events:none.
+     Each layer sits in a .par wrapper: the wrapper takes the scroll parallax
+     transform, the inner element keeps its own drift animation. Putting both
+     on one element would mean the parallax overwrites the keyframes. -->
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#top">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 14.5h10M10 6v8.5M6.5 6h7" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      RejectionIntel
+    </a>
+    <!-- Two groups, not seven equal links. Anchors scroll this page; the
+         tools are separate products. Reading them as one list meant nine
+         items competing at the same weight and the CTA squeezed off the
+         right edge. -->
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#math">The math</a>
+      <a href="#proof">Check us</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <span class="nav-sep" aria-hidden="true"></span>
+    <div class="nav-tools">
+      <a href="/ghost">Ghost check</a>
+      <a href="/employers">Employers</a>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch between light and dark theme">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+    </button>
+    <a class="nav-cta" href="/app">Find out why</a>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="pill"><span class="pill-dot"></span>Free while in beta · <b>no inbox access</b></span>
+      <h1>Employers won't tell you why they ghosted you.<br><em>Your data will.</em></h1>
+      <p class="hero-sub">
+        Upload your application history and our engine will pinpoint exactly where
+        your funnel is breaking — and tell you how to fix it. No made-up reasons,
+        just your data talking.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="/app">Find out why</a>
+        <a class="btn-ghost btn-icon" href="/app?demo=1">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9.25" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M10.2 8.6l5.2 3.4-5.2 3.4V8.6z" fill="currentColor"/>
+          </svg>
+          View a live demo
+        </a>
+      </div>
+      <p class="hero-note">Paste a spreadsheet or add jobs one at a time · Free, and the diagnosis always will be</p>
+    </div>
+
+    <div class="card-funnel">
+      <div class="cf-head">
+        <span class="cf-title">Sample funnel</span>
+        <span class="cf-badge">87 resolved</span>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">Applied</span>
+        <span class="fnum num">87</span>
+        <div class="track">
+          <div class="fill" style="width:100%;animation-delay:.05s"></div>
+        </div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel-row">
+          <span class="flabel">Any response</span>
+          <span class="insight">Most stop here</span>
+        </span>
+        <span class="fnum num" style="color:var(--accent)">16.1%</span>
+        <div class="track">
+          <div class="fill" style="width:63.9%;animation-delay:.16s"></div>
+        </div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">Interview</span>
+        <span class="fnum num" style="color:var(--accent)">8.0%</span>
+        <div class="track">
+          <div class="fill" style="width:31.7%;animation-delay:.27s"></div>
+        </div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">Final round</span>
+        <span class="fnum num">2.3%</span>
+        <div class="track">
+          <div class="fill" style="width:9.1%;animation-delay:.38s"></div>
+        </div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">Offer</span>
+        <span class="fnum num" style="color:var(--t-none)">0.0%</span>
+        <div class="track">
+          <div class="fill zero" style="animation-delay:.49s"></div>
+        </div>
+      </div>
+
+      <div class="outcomes">
+        <div class="oc-t">What happened to all 87</div>
+
+        <div class="oc-row">
+          <span class="oc-l">Someone replied</span>
+          <span class="oc-n">14</span>
+          <div class="oc-track">
+            <div class="oc-fill oc-reply" style="width:16.1%;animation-delay:.55s"></div>
+          </div>
+        </div>
+
+        <div class="oc-row">
+          <span class="oc-l">Rejected without a conversation</span>
+          <span class="oc-n">18</span>
+          <div class="oc-track">
+            <div class="oc-fill oc-rej" style="width:20.7%;animation-delay:.65s"></div>
+          </div>
+        </div>
+
+        <div class="oc-row">
+          <span class="oc-l">Never heard anything at all</span>
+          <span class="oc-n">55</span>
+          <div class="oc-track">
+            <div class="oc-fill oc-none" style="width:63.2%;animation-delay:.75s"></div>
+          </div>
+        </div>
+
+        <p class="oc-note"><b>Most rejections aren't rejections.</b> 55 of these 87
+          never produced a single reply — not a no, just nothing. That silence is the
+          part nobody measures, and it's the biggest number here.</p>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+
+<!-- ===================== REJECTION WALL ===================== -->
+<section class="band" aria-label="Common rejection email phrases">
+  <span class="band-label">87 rejections. 86 of them told you nothing.</span>
+
+  <div class="marquee" data-dir="1" data-speed="26">
+    <div class="mq-track">
+      <div class="mq-set">
+            <span class="chip">We've decided to move forward with other candidates</span>
+            <span class="chip">We'll keep your resume on file</span>
+            <span class="chip">After careful consideration</span>
+            <span class="chip">We were impressed by your background, however</span>
+            <span class="chip">The role has been filled internally</span>
+            <span class="chip">We had an unusually strong applicant pool</span>
+      </div>
+      <div class="mq-set" aria-hidden="true">
+            <span class="chip">We've decided to move forward with other candidates</span>
+            <span class="chip">We'll keep your resume on file</span>
+            <span class="chip">After careful consideration</span>
+            <span class="chip">We were impressed by your background, however</span>
+            <span class="chip">The role has been filled internally</span>
+            <span class="chip">We had an unusually strong applicant pool</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" data-dir="-1" data-speed="34">
+    <div class="mq-track">
+      <div class="mq-set">
+            <span class="chip">We're looking for someone with more relevant experience</span>
+            <span class="chip">Thank you for your interest in joining us</span>
+            <span class="chip">Unfortunately we won't be progressing your application</span>
+            <span class="chip">We needed deeper hands-on analytics for this role</span>
+            <span class="chip">Best of luck with your search</span>
+            <span class="chip">This isn't a reflection of your abilities</span>
+      </div>
+      <div class="mq-set" aria-hidden="true">
+            <span class="chip">We're looking for someone with more relevant experience</span>
+            <span class="chip">Thank you for your interest in joining us</span>
+            <span class="chip">Unfortunately we won't be progressing your application</span>
+            <span class="chip">We needed deeper hands-on analytics for this role</span>
+            <span class="chip">Best of luck with your search</span>
+            <span class="chip">This isn't a reflection of your abilities</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="band-foot">
+    Read them again: only one names something you could actually change.
+    <b>That's what we call an Observed finding.</b> The other 23 are why we're
+    careful about everything else we tell you.
+  </p>
+</section>
+
+<!-- ===================== TIERS ===================== -->
+<section class="tiers">
+  <div class="wrap">
+    <p class="tiers-intro">
+      Everything we tell you comes with a label saying how much we actually know.
+      You'll see these four throughout the product.
+    </p>
+    <div class="tier-grid reveal">
+      <div class="tier">
+        <span class="tier-name" style="color:var(--t-observed)"><span class="tier-dot" style="background:var(--t-observed)"></span>Observed</span>
+        <p>An employer wrote it down. We show you their exact words — nothing added.</p>
+      </div>
+      <div class="tier">
+        <span class="tier-name" style="color:var(--t-strong)"><span class="tier-dot" style="background:var(--t-strong)"></span>Strong</span>
+        <p>A real pattern in your applications. We checked, and luck doesn't explain it.</p>
+      </div>
+      <div class="tier">
+        <span class="tier-name" style="color:var(--t-weak)"><span class="tier-dot" style="background:var(--t-weak)"></span>Weak</span>
+        <p>Might mean something, might be luck. Worth keeping an eye on — not worth rewriting your resume for.</p>
+      </div>
+      <div class="tier">
+        <span class="tier-name" style="color:var(--t-none)"><span class="tier-dot" style="background:var(--t-none)"></span>Not enough data</span>
+        <p>We looked and genuinely can't say. You'll see this a lot at first — it's the honest answer.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FINDINGS ===================== -->
+<section class="sec" id="report">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">What a report looks like</p>
+      <h2>Three things we found in one job search</h2>
+      <p class="lede">Including one we wouldn't answer. Most tools would have given you an answer anyway.</p>
+    </div>
+
+    <div class="cards reveal">
+      <article class="card">
+        <div class="card-top">
+          <span class="tag tag-strong">Strong</span>
+          <span class="card-q">Across 87 applications</span>
+        </div>
+        <h3>Applications you fit well get answered far more often</h3>
+        <div class="arms">
+          <div>
+            <span class="arm-l">Roles you fit well</span>
+            <span class="arm-v" style="color:var(--accent)">38%</span>
+            <span class="arm-ci">heard back · 24 applications</span>
+          </div>
+          <div>
+            <span class="arm-l">Roles you fit poorly</span>
+            <span class="arm-v">8%</span>
+            <span class="arm-ci">heard back · 63 applications</span>
+          </div>
+        </div>
+        <p>The gap is big enough that bad luck doesn't explain it. And this is about your applications specifically — not the job market, and not something we're guessing at.</p>
+        <div class="card-do"><b>Do this:</b> check the fit score before you apply again. 63 of your applications were to roles you didn't really match.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <span class="tag tag-observed">Observed</span>
+          <span class="card-q">Said by 3 employers</span>
+        </div>
+        <h3>Three rejection emails named analytics depth</h3>
+        <p style="margin-top:0">Not a pattern we inferred — a phrase three separate employers typed after interviewing you. Your resume mentions SQL once, in a 2019 bullet, with no metric attached.</p>
+        <div class="arms">
+          <div>
+            <span class="arm-l">Jobs that asked for SQL</span>
+            <span class="arm-v num">31</span>
+            <span class="arm-ci">out of 87</span>
+          </div>
+          <div>
+            <span class="arm-l">Times it's on your resume</span>
+            <span class="arm-v num">1</span>
+            <span class="arm-ci">in a 2019 bullet</span>
+          </div>
+        </div>
+        <div class="card-do"><b>Do this:</b> pull the analytics work you've already done up to the front. You've done it — it just isn't visible.</div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <span class="tag tag-none">Not enough data</span>
+          <span class="card-q">We didn't test this</span>
+        </div>
+        <h3>Whether B2B roles outperform consumer roles</h3>
+        <p style="margin-top:0">You sent 6 applications to consumer companies. That's too few to compare against anything, so we left it alone rather than guess.</p>
+        <div class="arms">
+          <div>
+            <span class="arm-l">Consumer companies</span>
+            <span class="arm-v num" style="color:var(--t-none)">6</span>
+            <span class="arm-ci">applications</span>
+          </div>
+          <div>
+            <span class="arm-l">B2B companies</span>
+            <span class="arm-v num" style="color:var(--t-none)">81</span>
+            <span class="arm-ci">applications</span>
+          </div>
+        </div>
+        <div class="card-do"><b>Do this:</b> nothing for now. Two more consumer applications and we can answer it.</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW ===================== -->
+<section class="sec sec-alt" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">How it works</p>
+      <h2>Three steps. You only do the first one.</h2>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-n">1</div>
+        <h3>You send us your applications</h3>
+        <p>A list of where you applied: the company, the job title, the date, and what happened. Upload a spreadsheet, paste it straight out of Google Sheets, or type them in one at a time. If you saved the job ad as well, include it — that's how we find the skills you kept getting asked for. We check every row and tell you if any look wrong.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <h3>We do the maths — with no AI involved</h3>
+        <p>We read your resume and every job ad, then work out three things: how closely you matched each role, how often you actually heard back, and how much those numbers could be off given how many applications you've sent. It's ordinary arithmetic — the kind you could redo in a spreadsheet if you wanted to check us.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <h3>You get answers, labelled by how sure we are</h3>
+        <p>Before we call anything a pattern, we check whether plain bad luck could explain it, and drop the ones where it could. Only then does AI turn what's left into readable English — and it can only use the numbers we already worked out. It isn't allowed to come up with its own.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MATH ===================== -->
+<section class="sec" id="math">
+  <div class="wrap">
+    <div class="math reveal">
+      <p class="eyebrow">The math</p>
+      <h2>Why we don't sell resume A/B testing</h2>
+      <p class="math-body">
+        Everyone asks for it, and it looks great in a demo: send Resume A to ten jobs,
+        Resume B to ten more, declare a winner. Here's the problem. If you normally
+        hear back from 1 in 20 applications, proving one resume is genuinely
+        <em>twice</em> as good takes about 432 applications with each version.
+      </p>
+      <div class="math-figs">
+        <div class="mfig">
+          <div class="mfig-n num">432</div>
+          <p class="mfig-l">Applications needed with each resume to prove one is twice as good</p>
+        </div>
+        <div class="mfig">
+          <div class="mfig-n num">864</div>
+          <p class="mfig-l">Total applications for one honest comparison</p>
+        </div>
+        <div class="mfig">
+          <div class="mfig-n num">27%</div>
+          <p class="mfig-l">With 40 each, only a five-fold difference would show up at all</p>
+        </div>
+      </div>
+      <p class="math-foot">
+        Any product that declares a winner after 20 applications is showing you a
+        coin flip with a confident voice.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COMPARISON ===================== -->
+<section class="sec sec-alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Where this fits</p>
+      <h2>Trackers record. Apply tools submit. Neither closes the loop.</h2>
+    </div>
+    <div class="cmp-wrap reveal">
+      <div class="cmp-scroll">
+        <table class="cmp">
+          <thead>
+            <tr>
+              <th scope="col">Capability</th>
+              <th scope="col">RejectionIntel</th>
+              <th scope="col">Application trackers</th>
+              <th scope="col">AI apply tools</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Shows how certain each number is</td><td class="yes">Yes</td><td class="no">One number, no context</td><td class="no">No</td></tr>
+            <tr><td>Checks whether a pattern is just luck</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+            <tr><td>Tells silence apart from a real rejection</td><td class="yes">Yes</td><td class="no">Sometimes</td><td class="no">No</td></tr>
+            <tr><td>Can return “we don't know yet”</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+            <tr><td>Shows the employer's exact words</td><td class="yes">Yes</td><td class="no">Stores it</td><td class="no">No</td></tr>
+            <tr><td>Claims to know why you were rejected</td><td class="no">Never</td><td class="no">No</td><td class="warn">Often</td></tr>
+            <tr><td>Predicts your future success rate</td><td class="no">Never</td><td class="no">No</td><td class="warn">Often</td></tr>
+            <tr><td>Finds you jobs to apply to</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="cmp-note">Last two rows aren't modesty. Nobody can see inside a hiring decision, and nobody can replay your job search with one thing changed.</p>
+  </div>
+</section>
+
+<!-- ===================== PROOF ===================== -->
+<section class="sec sec-alt" id="proof">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Check us</p>
+      <h2>Everything above, and how to prove it yourself</h2>
+      <p class="lede">A product whose whole argument is "we don't overclaim" has no
+        business asking you to take it on faith. Every claim here has a way to check it.</p>
+    </div>
+
+    <div class="proof reveal">
+      <div class="pf">
+        <span class="pf-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <h3>We almost never invent a pattern</h3>
+        <p>Test something twenty-five times and you'll find a couple of "real" results
+          by pure luck. We correct for that. Run against 300 simulated people whose
+          outcomes were pure chance, we reported a strong finding 0.02 times per person.
+          Without the correction it's roughly twenty times higher.</p>
+        <p class="pf-how"><b>Check it:</b> run <code>python -m tests.test_pipeline</code>.
+          The false-positive simulation is in there and prints its own result.</p>
+      </div>
+
+      <div class="pf">
+        <span class="pf-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <h3>The AI can't make up a number</h3>
+        <p>Every figure in your report is worked out in ordinary code first. The AI only
+          turns those figures into sentences, and its output is checked back against
+          them. If it writes a number that isn't in your data, that draft is thrown away
+          before you see it.</p>
+        <p class="pf-how"><b>Check it:</b> the same check refuses a resume suggestion
+          containing a metric you never wrote — ask for a rewrite and you'll get a blank
+          to fill, never an invented percentage.</p>
+      </div>
+
+      <div class="pf">
+        <span class="pf-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <h3>We say "we don't know" out loud</h3>
+        <p>Telling two resume versions apart reliably takes about 432 applications with
+          each one. Below that we show you both numbers and refuse to name a winner —
+          even when one looks twice as good. Most tools would call it.</p>
+        <p class="pf-how"><b>Check it:</b> upload data with two resume versions. The
+          panel says how many more applications an honest answer would need.</p>
+      </div>
+
+      <div class="pf">
+        <span class="pf-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <h3>Sharing can't leak who you applied to</h3>
+        <p>The share card carries counts and rates, nothing else. Before it's built we
+          check it against every company name, job title and rejection quote in your own
+          report. If anything survives, you get no card rather than a leaky one.</p>
+        <p class="pf-how"><b>Check it:</b> run
+          <code>python -m tests.test_share_redaction</code>. On our sample it checks
+          against 232 identifying strings and proves the check isn't a no-op.</p>
+      </div>
+
+      <div class="pf">
+        <span class="pf-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <h3>No jargon, enforced rather than intended</h3>
+        <p>Statistical language leaks through error messages and fallback text, not just
+          the parts someone remembers to edit. So there's a dictionary of the terms and
+          an automatic check that scans what reaches your screen for anything we forgot.</p>
+        <p class="pf-how"><b>Check it:</b> read the report. If you find a p-value, a
+          confidence interval or a variable name anywhere in it, that's a bug and we
+          want to hear about it.</p>
+      </div>
+
+      <div class="pf">
+        <span class="pf-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <h3>The diagnosis is free. Always.</h3>
+        <p>Where you're losing, how often employers reply, and what's missing from your
+          resume cost nothing and always will. If we ever charge for something, it'll be
+          the work of fixing it — never the part that tells you what's wrong.</p>
+        <p class="pf-how"><b>Check it:</b> the pricing below. Everything diagnostic sits
+          in the free column, and it isn't a trial.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRICING ===================== -->
+<section class="sec" id="pricing">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Pricing</p>
+      <h2>Cheap for you. The real product is for cohorts.</h2>
+      <p class="lede">
+        Where you're losing is free, permanently. If we ever charge, it's for the work
+        of fixing it — never for the part that tells you what's wrong. And one person's
+        job search will never produce enough data to be certain about much; five hundred
+        people together will, which is where the real product lives.
+      </p>
+    </div>
+    <div class="plans reveal">
+      <div class="plan">
+        <span class="plan-name">Free</span>
+        <div class="plan-price">₹0</div>
+        <p class="plan-for">See where you're dropping out and how well you matched each role — however few applications you have.</p>
+        <ul>
+          <li>Upload or paste your applications</li>
+          <li>See where you drop out, and how sure we are</li>
+          <li>A match score for every role you applied to</li>
+          <li>Which skills each job wanted that you're missing</li>
+          <li>Pattern analysis once you have 25 finished applications</li>
+        </ul>
+        <a class="btn-ghost" href="/app">Start free</a>
+      </div>
+
+      <div class="plan plan-hi">
+        <span class="plan-flag">Most useful</span>
+        <span class="plan-name">Pro</span>
+        <div class="plan-price">₹199 <span>/ month</span></div>
+        <p class="plan-for">For an active search. Cancel when you're hired — most people do, and that's fine.</p>
+        <ul>
+          <li>Everything in Free</li>
+          <li>Updates automatically as you hear back</li>
+          <li>Track which resume you sent where</li>
+          <li>Pulls the real reasons out of rejection emails</li>
+          <li>Download your full report</li>
+        </ul>
+        <a class="btn-primary" href="/app">Start Pro</a>
+      </div>
+
+      <div class="plan">
+        <span class="plan-name">Cohort</span>
+        <div class="plan-price">Talk to us</div>
+        <p class="plan-for">Bootcamps, universities, outplacement firms — anyone measured on placement rates.</p>
+        <ul>
+          <li>See the whole cohort's results in one place</li>
+          <li>The skill gaps holding your students back most</li>
+          <li>Enough data for the maths to actually work</li>
+          <li>Anonymous, opt-in, and yours to export</li>
+        </ul>
+        <a class="btn-ghost" href="/app">Get in touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="sec sec-alt">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Questions</p>
+      <h2>The ones worth answering honestly</h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>Can you tell me why a specific company rejected me?</summary>
+        <p>No. Unless they wrote it down, nobody can — and most don't. What we can do is find patterns across your own applications and show you how confident those patterns are. If an employer did write a reason, we quote it back to you as theirs, not as ours.</p>
+      </details>
+      <details>
+        <summary>Why do I need 25 applications before anything happens?</summary>
+        <p>Below that, any pattern we found would be noise wearing a suit. You'll still see your funnel and per-application fit scores from your very first upload — we just won't dress up chance as insight. The counter tells you how many more you need.</p>
+      </details>
+      <details>
+        <summary>What counts as a rejection if they never replied?</summary>
+        <p>It doesn't. Silence is recorded as ghosted, not rejected, and applications still inside the response window are excluded from the statistics entirely — counting them would bias results against your most recent applications, which have had less time to come back.</p>
+      </details>
+      <details>
+        <summary>Do you tell me my chances will go from 18% to 34%?</summary>
+        <p>Never. To say that, we'd have to replay your job search with one thing changed — same you, same roles, different resume. Nobody has that. Any product quoting you a predicted lift is quoting you a number it made up.</p>
+      </details>
+      <details>
+        <summary>Does an AI write my report?</summary>
+        <p>It writes the sentences, and only the sentences. Every figure is computed first in ordinary code. The writing step receives those figures and nothing else, and its output is checked against them — if it produces a number that isn't in the source data, that draft is rejected before you ever see it.</p>
+      </details>
+      <details>
+        <summary>Do you need access to my email?</summary>
+        <p>Not today. The beta is CSV only. Inbox parsing would make the data far richer and it's on the roadmap, but it's a heavy permission to ask for before we've shown you the analysis is worth having.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CLOSE ===================== -->
+<section class="close">
+  <div class="wrap">
+    <div class="close-box reveal">
+      <h2>Your job search is already generating data</h2>
+      <p>Eighty-seven applications is a dataset. Right now it's sitting in a spreadsheet telling you nothing. Upload it and find out where you actually lose.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="/app">Find out why</a>
+        <a class="btn-ghost" href="/api/template">Download the template</a>
+      </div>
+      <p class="hero-note">Takes a spreadsheet, a paste, or nothing at all · No inbox access</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="brand" href="#top">
+        <span class="brand-mark">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5 14.5h10M10 6v8.5M6.5 6h7" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+          </svg>
+        </span>
+        RejectionIntel
+      </a>
+      <div class="foot-links">
+        <a href="#report">Sample report</a>
+        <a href="#math">Methodology</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#pricing">For cohorts</a>
+        <a href="#top">Privacy</a>
+        <a href="#top">Terms</a>
+      </div>
+    </div>
+    <p class="foot-fine">
+      Figures on this page are computed from a synthetic 87-application dataset and labelled
+      as samples. Funnel bars are drawn on a shared 0–25.2% scale so small rates stay readable;
+      the printed percentages are the real values. Full ranges and certainty checks
+      appear on every finding inside the report. We publish no success-rate or time-to-hire claims, because we don't yet
+      have the data to support one.<br>
+      © 2026 RejectionIntel
+    </p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var btn = document.getElementById('themeBtn');
+  if(!btn) return;
+  btn.addEventListener('click', function(){
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try{ localStorage.setItem('ri-theme', next); }catch(e){}
+  });
+  // Follow the OS only while the user hasn't chosen for themselves.
+  if(window.matchMedia){
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){
+      try{ if(localStorage.getItem('ri-theme')) return; }catch(err){}
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    });
+  }
+})();
+</script>
+<script>
+/* Marquee: rAF-driven so scroll velocity can steer it.
+   Idle it drifts at `data-speed` px/s. Scrolling adds velocity;
+   scrolling up flips direction. Velocity decays back to the drift. */
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lanes = [].slice.call(document.querySelectorAll('.marquee'));
+  if(!lanes.length) return;
+
+  lanes = lanes.map(function(el){
+    var track = el.querySelector('.mq-track');
+    return {
+      el: el, track: track,
+      dir: parseFloat(el.dataset.dir) || 1,
+      base: parseFloat(el.dataset.speed) || 30,
+      x: 0, half: 0, paused: false
+    };
+  });
+
+  function measure(){
+    lanes.forEach(function(l){ l.half = l.track.scrollWidth / 2; });
+  }
+  measure();
+  window.addEventListener('resize', measure);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(measure); }
+
+  lanes.forEach(function(l){
+    l.el.addEventListener('mouseenter', function(){ l.paused = true; });
+    l.el.addEventListener('mouseleave', function(){ l.paused = false; });
+  });
+
+  var scrollBoost = 0, lastY = window.scrollY;
+  window.addEventListener('scroll', function(){
+    var dy = window.scrollY - lastY;
+    lastY = window.scrollY;
+    // Clamped so a flick of the wheel can't fling the track across the screen.
+    scrollBoost = Math.max(-90, Math.min(90, scrollBoost + dy * 1.6));
+  }, {passive:true});
+
+  if(reduce) return;   // leave the chips still
+
+  var last = performance.now();
+  function frame(now){
+    var dt = Math.min((now - last) / 1000, 0.05);   // cap after a tab switch
+    last = now;
+    scrollBoost *= 0.90;                             // decay back to drift
+
+    lanes.forEach(function(l){
+      if(l.paused || !l.half) return;
+      // Signed speed: scrolling down adds, scrolling up subtracts. Once the
+      // boost exceeds the drift speed the lane simply reverses — no special
+      // case, no Math.sign() that can return 0 and stall the lane.
+      var speed = l.base + scrollBoost;
+      l.x -= speed * l.dir * dt;
+      // The track holds two identical sets, so half its width is one full loop.
+      while(l.x <= -l.half) l.x += l.half;
+      while(l.x >= 0)       l.x -= l.half;
+      l.track.style.transform = 'translate3d(' + l.x + 'px,0,0)';
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* Scroll reveal */
+(function(){
+  var items = document.querySelectorAll('.reveal');
+  if(!items.length) return;
+  if(!('IntersectionObserver' in window)){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, {rootMargin:'0px 0px -12% 0px', threshold:0.08});
+  items.forEach(function(el){ io.observe(el); });
+})();
+</script>
+
+<script>
+/* Scroll parallax for the fixed backdrop.
+   The layer is position:fixed, so without this it would sit perfectly still
+   for the whole page and read as wallpaper. Each wrapper moves at its own
+   rate, which is what produces depth. Clamped so nothing drifts off-screen
+   on a long page, and rAF-throttled so the scroll handler stays cheap. */
+(function(){
+  var layers = [].slice.call(document.querySelectorAll('.par'));
+  if(!layers.length) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var LIMIT = 300, ticking = false;
+
+  function apply(){
+    var y = window.scrollY || 0;
+    for(var i = 0; i < layers.length; i++){
+      var rate = parseFloat(layers[i].dataset.rate) || 0;
+      var off = Math.max(-LIMIT, Math.min(LIMIT, y * rate));
+      layers[i].style.transform = 'translate3d(0,' + off.toFixed(1) + 'px,0)';
+    }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(!ticking){ ticking = true; requestAnimationFrame(apply); }
+  }, {passive:true});
+  apply();
+})();
+</script>
+<script src="/backdrop.js"></script>
+</body>
+</html>

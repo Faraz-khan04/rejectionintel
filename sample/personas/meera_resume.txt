@@ -1,0 +1,31 @@
+MEERA KRISHNAN
+Data Analyst | Pune, India
+meera.k@example.com | +91 99887 66554 | linkedin.com/in/meerakrishnan
+
+SUMMARY
+Data analyst with six years turning messy operational data into decisions.
+Comfortable owning a question end to end, from extraction to the meeting.
+
+EXPERIENCE
+
+Senior Data Analyst, Hearth Analytics                        2022 - present
+- Rebuilt the retention reporting suite in SQL and Tableau, cutting the monthly
+  close from four days to six hours.
+- Ran the churn analysis that identified a 14% segment driving 40% of losses.
+- Automated eleven recurring reports in Python, saving roughly 20 hours a month.
+- Built the cohort model the commercial team now uses for renewal forecasting.
+
+Data Analyst, Kettle & Co                                    2019 - 2022
+- Owned the weekly operations dashboard used by three department heads.
+- Wrote the SQL layer behind the pricing review, covering 2,300 SKUs.
+- Cleaned and consolidated four legacy data sources into one reporting schema.
+
+Junior Analyst, Copperline                                   2018 - 2019
+- Produced monthly reporting packs for the supply chain team.
+
+EDUCATION
+M.Sc Statistics, Savitribai Phule Pune University, 2018
+B.Sc Mathematics, Fergusson College, 2016
+
+SKILLS
+SQL, Excel, Tableau, Python, pandas, Data Analysis, Statistics, Power BI

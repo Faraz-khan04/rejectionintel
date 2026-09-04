@@ -1,0 +1,21 @@
+PRIYA RAGHAVAN
+Product Manager | Bengaluru
+
+EXPERIENCE
+
+Senior Product Manager, Corvus Systems            2022 - present
+- Owned the billing platform roadmap across three engineering teams.
+- Ran A/B Testing on the checkout funnel, lifting completion.
+- Partnered with design in Figma on a full surface redesign.
+- Managed sprint planning in Jira using Agile ceremonies.
+
+Product Manager, Riverstone                        2019 - 2022
+- Shipped a self-serve onboarding flow for SMB customers.
+- Built reporting dashboards; pulled cohorts with SQL for the weekly review.
+- Drove Roadmapping and quarterly planning with Stakeholder Management across sales and support.
+
+Associate Product Manager, Kettle & Co             2018 - 2019
+- Supported API Design work for the partner integrations team.
+
+SKILLS
+Roadmapping, A/B Testing, Figma, Jira, Agile, Stakeholder Management, SQL, Excel

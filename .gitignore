@@ -1,0 +1,21 @@
+# Local database and its write-ahead log
+rejectionintel.db
+rejectionintel.db-*
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets — never commit these
+.secret_key
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor noise
+.vscode/
+.idea/
+.DS_Store

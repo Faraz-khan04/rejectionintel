@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RejectionIntel — UI kit</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Reference implementations for the four UI pieces. Everything
+   here is copy-pasteable into site/app.html — the class names and
+   tokens already match. Open this file directly in a browser to
+   see all four working against mock data.
+   ============================================================ */
+:root{
+  --bg:#F7F7FB;--card:#FFFFFF;--ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
+  --line:#E6E8F0;--line-2:#EEF0F6;
+  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#EEEBFE;--accent-ink:#4536C4;
+  --ok:#0E8A5F;--warn:#C4820E;--none:#78809A;
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+[data-theme="dark"]{
+  --bg:#0A0B11;--card:#14161F;--ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
+  --line:#252938;--line-2:#1C1F2B;
+  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#231F45;--accent-ink:#B9ADFF;
+  --ok:#3FC495;--warn:#E0A93A;--none:#8891A6;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.1}
+.wrap{max-width:1000px;margin:0 auto;padding:40px 26px 140px}
+.demo{margin-bottom:52px}
+.demo > h2{font-size:1.3rem;margin-bottom:6px}
+.demo > p{color:var(--muted);font-size:.92rem;margin:0 0 20px;max-width:66ch}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* ============================================================
+   1. GLASSMORPHISM
+   The trick that makes glass read as glass is the 1px inset
+   highlight on the top edge, not the blur. Without it a
+   translucent panel just looks faded.
+   ============================================================ */
+.glass{
+  background:color-mix(in srgb,var(--card) 72%,transparent);
+  backdrop-filter:blur(18px) saturate(1.5);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);
+  border:1px solid color-mix(in srgb,var(--line) 70%,transparent);
+  border-radius:20px;
+  box-shadow:0 1px 0 0 rgba(255,255,255,.55) inset,
+             0 10px 34px -18px rgba(14,16,23,.45);
+  padding:26px;
+}
+[data-theme="dark"] .glass{box-shadow:0 1px 0 0 rgba(255,255,255,.07) inset,0 14px 40px -20px rgba(0,0,0,.75)}
+
+/* soft radial wash behind everything */
+.aura{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.aura span{position:absolute;border-radius:50%;filter:blur(80px)}
+.a1{width:44vw;height:40vw;right:8%;top:-8%;background:radial-gradient(circle,rgba(139,92,246,.42),transparent 68%)}
+.a2{width:38vw;height:34vw;left:2%;top:38%;background:radial-gradient(circle,rgba(90,71,224,.34),transparent 68%)}
+
+/* ============================================================
+   2. PROGRESS STEPPER — terminal styling
+   ============================================================ */
+.stepper{font-family:var(--mono);font-size:.86rem}
+.stepper-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding-bottom:14px;margin-bottom:6px;border-bottom:1px solid var(--line-2)}
+.stepper-title{font-family:var(--display);font-size:1rem;font-weight:700;letter-spacing:-.02em}
+.stepper-elapsed{color:var(--muted);font-size:.78rem}
+.stp{display:grid;grid-template-columns:22px 1fr auto;gap:12px;align-items:start;padding:9px 0}
+.stp-icon{width:22px;height:22px;display:grid;place-items:center;margin-top:-1px}
+.stp-label{color:var(--muted);transition:color .2s}
+.stp-detail{display:block;font-size:.76rem;color:var(--muted);opacity:.75;margin-top:2px}
+.stp-time{color:var(--muted);font-size:.74rem;font-variant-numeric:tabular-nums}
+
+.stp[data-state="active"] .stp-label{color:var(--ink);font-weight:500}
+.stp[data-state="done"]   .stp-label{color:var(--ink-2)}
+.stp[data-state="failed"] .stp-label{color:#E5484D}
+.stp[data-state="skipped"] .stp-label{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1px}
+
+.dot-pending{width:7px;height:7px;border-radius:50%;background:var(--line);border:1px solid var(--muted);opacity:.5}
+.spinner{width:15px;height:15px;border-radius:50%;border:2px solid var(--accent-soft);border-top-color:var(--accent);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tick{width:15px;height:15px;color:var(--ok)}
+.cross{width:15px;height:15px;color:#E5484D}
+
+/* the active row gets a faint sweep so it reads as "working" */
+.stp[data-state="active"]{position:relative;overflow:hidden;border-radius:8px}
+.stp[data-state="active"]::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 12%,transparent),transparent);
+  transform:translateX(-100%);animation:sweep 1.6s ease-in-out infinite;
+}
+@keyframes sweep{to{transform:translateX(100%)}}
+
+.bar{height:4px;border-radius:999px;background:var(--line-2);overflow:hidden;margin-top:16px}
+.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .45s cubic-bezier(.2,.8,.3,1)}
+
+/* ============================================================
+   3. DRILL-DOWN MODAL
+   ============================================================ */
+.drill{
+  cursor:pointer;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left;
+  border-bottom:1.5px dashed color-mix(in srgb,var(--accent) 55%,transparent);
+  transition:background .15s;border-radius:4px;
+}
+.drill:hover{background:var(--accent-soft)}
+.kpi-v{font-family:var(--display);font-size:2.2rem;font-weight:800;letter-spacing:-.04em;color:var(--accent);display:block;line-height:1}
+.kpi-l{font-size:.8rem;color:var(--muted)}
+
+dialog.modal{
+  border:0;padding:0;background:transparent;max-width:min(760px,94vw);width:100%;
+  color:var(--ink);
+}
+dialog.modal::backdrop{background:rgba(6,7,12,.62);backdrop-filter:blur(5px)}
+.modal-inner{
+  background:color-mix(in srgb,var(--card) 88%,transparent);
+  backdrop-filter:blur(22px) saturate(1.5);
+  border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  box-shadow:0 1px 0 0 rgba(255,255,255,.5) inset,0 30px 70px -24px rgba(0,0,0,.6);
+  animation:pop .22s cubic-bezier(.2,.9,.3,1);
+}
+[data-theme="dark"] .modal-inner{box-shadow:0 1px 0 0 rgba(255,255,255,.07) inset,0 30px 70px -24px rgba(0,0,0,.85)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985)}}
+.modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:22px 24px;border-bottom:1px solid var(--line-2)}
+.modal-head h3{font-size:1.15rem}
+.modal-head p{margin:6px 0 0;font-size:.87rem;color:var(--muted)}
+.modal-x{background:none;border:1px solid var(--line);color:var(--muted);width:32px;height:32px;border-radius:9px;cursor:pointer;flex:none;font-size:1rem;line-height:1}
+.modal-x:hover{color:var(--ink);border-color:var(--muted)}
+.modal-body{max-height:min(56vh,460px);overflow:auto;padding:6px 8px 8px}
+.mrow{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:11px 16px;border-radius:10px}
+.mrow:hover{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.mrow-title{font-weight:500;font-size:.93rem}
+.mrow-sub{font-size:.79rem;color:var(--muted)}
+.mrow-fit{font-family:var(--mono);font-size:.88rem;font-variant-numeric:tabular-nums}
+.chip{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.chip-ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.chip-no{background:color-mix(in srgb,var(--none) 16%,transparent);color:var(--none)}
+.modal-foot{padding:14px 24px;border-top:1px solid var(--line-2);font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ============================================================
+   4. STICKY ACTION BAR
+   ============================================================ */
+.sticky-bar{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:60;
+  width:min(880px,calc(100vw - 32px));
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:color-mix(in srgb,var(--card) 78%,transparent);
+  backdrop-filter:blur(20px) saturate(1.6);
+  border:1px solid var(--line);border-radius:16px;padding:14px 18px;
+  box-shadow:0 1px 0 0 rgba(255,255,255,.5) inset,0 18px 44px -20px rgba(0,0,0,.5);
+}
+[data-theme="dark"] .sticky-bar{box-shadow:0 1px 0 0 rgba(255,255,255,.07) inset,0 18px 44px -20px rgba(0,0,0,.85)}
+.sticky-tag{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:4px 10px;border-radius:999px;flex:none}
+.sticky-text{flex:1;min-width:220px;font-size:.9rem;color:var(--ink-2)}
+.sticky-text b{color:var(--ink);font-weight:600}
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;font-family:var(--body);font-weight:600;font-size:.9rem;padding:11px 20px;border-radius:11px;cursor:pointer;white-space:nowrap}
+.btn-quiet{background:none;border:1px solid var(--line);color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="aura"><span class="a1"></span><span class="a2"></span></div>
+
+<div class="wrap">
+  <h1 style="font-size:2rem;margin-bottom:8px">UI kit</h1>
+  <p style="color:var(--muted);margin:0 0 40px">Four components, working. Class names match <code>site/app.html</code>.</p>
+
+  <!-- 1 ------------------------------------------------------------- -->
+  <section class="demo">
+    <h2>1 · Processing stepper</h2>
+    <p>Driven by the SSE payload from <code>/api/jobs/{id}/stream</code>. Renders whatever steps the server sends, so adding a pipeline stage in <code>core/tasks.py</code> needs no frontend change.</p>
+    <div class="glass">
+      <div class="stepper">
+        <div class="stepper-head">
+          <span class="stepper-title">Analysing your job search</span>
+          <span class="stepper-elapsed" id="elapsed">0.0s</span>
+        </div>
+        <div id="steps"></div>
+        <div class="bar"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <button class="btn btn-quiet" style="margin-top:14px" onclick="runDemo()">Replay</button>
+  </section>
+
+  <!-- 2 ------------------------------------------------------------- -->
+  <section class="demo">
+    <h2>2 · Drill-down</h2>
+    <p>Any statistic is a button. Click the number to see the exact applications behind it — the fastest way to make someone trust a figure is to show them the rows.</p>
+    <div class="glass" style="display:flex;gap:44px;flex-wrap:wrap">
+      <div>
+        <button class="drill" onclick="openDrill('responded')">
+          <span class="kpi-v">16.1%</span>
+          <span class="kpi-l">Response rate · 14 of 87</span>
+        </button>
+      </div>
+      <div>
+        <button class="drill" onclick="openDrill('nofit')">
+          <span class="kpi-v">63</span>
+          <span class="kpi-l">Applications below fit 80</span>
+        </button>
+      </div>
+      <div>
+        <button class="drill" onclick="openDrill('sql')">
+          <span class="kpi-v">31</span>
+          <span class="kpi-l">JDs requiring SQL</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 ------------------------------------------------------------- -->
+  <section class="demo">
+    <h2>3 · Glass panel</h2>
+    <p>The inset top highlight is what sells it. Blur alone reads as "faded", not "glass".</p>
+    <div class="glass">
+      <h3 style="font-size:1.05rem;margin-bottom:8px">Applications you fit well get answered more often</h3>
+      <p style="margin:0;color:var(--ink-2);font-size:.93rem">Fit ≥ 80 responded at 38% across 24 applications, versus 8% across 63 below it.</p>
+    </div>
+  </section>
+
+  <p style="color:var(--muted);font-size:.9rem">↓ the sticky bar is pinned at the bottom</p>
+</div>
+
+<!-- 4 ---------------------------------------------------------------- -->
+<div class="sticky-bar">
+  <span class="sticky-tag">Next step</span>
+  <span class="sticky-text">You sent <b>63 applications below fit 80</b>. Reviewing those before you apply again is the highest-leverage change available.</span>
+  <button class="btn" onclick="openDrill('nofit')">Show me</button>
+</div>
+
+<dialog class="modal" id="modal">
+  <div class="modal-inner">
+    <div class="modal-head">
+      <div><h3 id="mTitle"></h3><p id="mSub"></p></div>
+      <button class="modal-x" onclick="document.getElementById('modal').close()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+    <div class="modal-foot"><span id="mFoot"></span><span>Esc to close</span></div>
+  </div>
+</dialog>
+
+<script>
+/* ---------- mock data; in the app this comes from the analyze payload ---------- */
+var APPS = [
+  {company:"Corvus Systems", title:"Senior PM, Platform", fit:91, responded:true,  stage:"interview", sql:true},
+  {company:"Northwind Data",  title:"Product Manager, Data", fit:88, responded:true,  stage:"screen",   sql:true},
+  {company:"Lumen Labs",      title:"Product Manager",       fit:84, responded:true,  stage:"screen",   sql:false},
+  {company:"Pinehold",        title:"Senior Product Manager",fit:81, responded:false, stage:"submitted",sql:true},
+  {company:"Vantage Grid",    title:"Group Product Manager", fit:72, responded:false, stage:"submitted",sql:true},
+  {company:"Blue Harbor",     title:"Principal PM",          fit:64, responded:false, stage:"submitted",sql:false},
+  {company:"Mercato",         title:"Director of Product",   fit:51, responded:false, stage:"submitted",sql:true},
+  {company:"Falconry",        title:"Product Manager, Growth",fit:44,responded:false, stage:"submitted",sql:false}
+];
+
+var VIEWS = {
+  responded: {t:"Applications that got a response",
+              s:"14 of 87 · the numerator behind your 16.1% response rate",
+              f:function(a){return a.responded}},
+  nofit:     {t:"Applications below fit 80",
+              s:"63 of 87 · these are where your response rate collapses",
+              f:function(a){return a.fit < 80}},
+  sql:       {t:"Job descriptions requiring SQL",
+              s:"31 of 87 · required, not preferred",
+              f:function(a){return a.sql}}
+};
+
+function openDrill(key){
+  var v = VIEWS[key], rows = APPS.filter(v.f);
+  document.getElementById('mTitle').textContent = v.t;
+  document.getElementById('mSub').textContent = v.s;
+  document.getElementById('mBody').innerHTML = rows.map(function(a){
+    return '<div class="mrow">'
+      + '<div><div class="mrow-title">' + esc(a.company) + '</div>'
+      + '<div class="mrow-sub">' + esc(a.title) + '</div></div>'
+      + '<span class="mrow-fit">fit ' + a.fit + '</span>'
+      + '<span class="chip ' + (a.responded ? 'chip-ok' : 'chip-no') + '">'
+      + esc(a.responded ? a.stage : 'no response') + '</span></div>';
+  }).join('');
+  document.getElementById('mFoot').textContent =
+    rows.length + ' shown (sample data — the real modal lists all of them)';
+  document.getElementById('modal').showModal();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* click the backdrop to dismiss — <dialog> doesn't do this natively */
+document.getElementById('modal').addEventListener('click', function(e){
+  if(e.target === this) this.close();
+});
+
+/* ---------- stepper ---------- */
+var ICONS = {
+  pending:'<span class="dot-pending"></span>',
+  active :'<span class="spinner"></span>',
+  done   :'<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  skipped:'<span class="dot-pending"></span>',
+  failed :'<svg class="cross" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+
+/* Renders the server's payload verbatim. No step list lives in the frontend. */
+function renderSteps(payload){
+  document.getElementById('steps').innerHTML = payload.steps.map(function(s){
+    return '<div class="stp" data-state="' + s.state + '">'
+      + '<span class="stp-icon">' + ICONS[s.state] + '</span>'
+      + '<span><span class="stp-label">' + esc(s.label) + '</span>'
+      + (s.detail ? '<span class="stp-detail">' + esc(s.detail) + '</span>' : '') + '</span>'
+      + '<span class="stp-time">' + (s.seconds != null ? s.seconds.toFixed(1) + 's' : '') + '</span>'
+      + '</div>';
+  }).join('');
+  var settled = payload.steps.filter(function(s){
+    return s.state === 'done' || s.state === 'skipped' || s.state === 'failed'; }).length;
+  document.getElementById('bar').style.width =
+    Math.round(settled / payload.steps.length * 100) + '%';
+  document.getElementById('elapsed').textContent = payload.elapsed.toFixed(1) + 's';
+}
+
+/* Real wiring — one function, that's the whole integration:
+     var es = new EventSource('/api/jobs/' + id + '/stream');
+     es.addEventListener('progress', e => renderSteps(JSON.parse(e.data)));
+     es.addEventListener('done', e => { es.close(); render(JSON.parse(e.data).result); });
+   Below is a local simulation so this file runs standalone.        */
+var SCRIPT = [
+  ["ingest",  "88 rows, 2 warnings",      900],
+  ["resume",  "8.6 yrs · 9 skills",       700],
+  ["jobs",    "12 cached · 76 extracted", 2200],
+  ["fit",     "88 scored",                600],
+  ["stats",   "9 hypotheses · BH applied",900],
+  ["narrate", "gemini · 5 calls",         1400]
+];
+var timer;
+function runDemo(){
+  clearInterval(timer);
+  var t0 = Date.now(), i = -1, elapsedAt = 0;
+  var state = SCRIPT.map(function(s){
+    return {key:s[0], label:LABELS[s[0]], state:'pending', detail:'', seconds:null}; });
+
+  function tick(){
+    var payload = {steps:state, elapsed:(Date.now()-t0)/1000};
+    renderSteps(payload);
+  }
+  function advance(){
+    if(i >= 0){ state[i].state='done'; state[i].detail=SCRIPT[i][1];
+                state[i].seconds=SCRIPT[i][2]/1000; }
+    i++;
+    if(i >= SCRIPT.length){ tick(); clearInterval(timer); return; }
+    state[i].state='active'; state[i].detail='working…';
+    tick();
+    setTimeout(advance, SCRIPT[i][2]);
+  }
+  timer = setInterval(tick, 100);
+  advance();
+}
+var LABELS = {ingest:"Reading your CSV", resume:"Parsing your resume",
+  jobs:"Extracting job requirements", fit:"Scoring every application",
+  stats:"Testing for patterns", narrate:"Writing up the findings"};
+runDemo();
+</script>
+</body>
+</html>

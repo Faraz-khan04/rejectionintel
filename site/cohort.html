@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cohort — RejectionIntel</title>
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('ri-theme');
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F7FB;--card:#FFFFFF;
+  --paper:#F7F7FB;--panel:#FFFFFF;
+  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
+  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+
+  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+
+  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
+  --t-insufficient:#78809A;
+  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+
+  --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
+  --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
+  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
+
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
+  --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
+  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+}
+[data-theme="dark"]{
+  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
+  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
+  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+
+  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+
+  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
+  --t-insufficient:#8891A6;
+  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
+  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+
+  --sem-strong:#3FC495;--sem-strong-bg:#10352A;
+  --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
+  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:10px}
+h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.033em;margin:0;line-height:1.12}
+
+.nav{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule)}
+.nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);
+  margin:0 auto;padding:0 26px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;
+  font-size:1.04rem;letter-spacing:-.03em;text-decoration:none;color:inherit}
+.brand-mark{width:28px;height:28px;border-radius:14px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--accent),var(--accent-2))}
+.tabs{display:flex;gap:4px;margin-left:20px;padding:4px;border-radius:14px;background:var(--rule-soft)}
+.tabs a{font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;
+  padding:7px 15px;border-radius:14px}
+.tabs a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(14,16,23,.12)}
+@media(max-width:800px){.tabs{display:none}}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:.85rem;color:var(--muted)}
+.theme-btn{width:36px;height:36px;border-radius:14px;border:1px solid var(--rule);
+  background:var(--panel);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;padding:0}
+.theme-btn svg{width:16px;height:16px}
+.theme-btn .moon{display:none}
+[data-theme="dark"] .theme-btn .moon{display:block}
+[data-theme="dark"] .theme-btn .sun{display:none}
+
+.wrap{max-width:var(--wrap);margin:0 auto;padding:34px 26px 90px}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);margin:0 0 9px}
+.sub{color:var(--muted);font-size:.95rem;margin:10px 0 0;max-width:64ch}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+  padding:26px;margin-top:22px}
+
+.setup{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:760px){.setup{grid-template-columns:1fr}}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--ink-2);margin-bottom:7px}
+input{width:100%;padding:11px 13px;border-radius:14px;border:1px solid var(--rule);
+  background:var(--paper);color:var(--ink);font-family:var(--body);font-size:.92rem}
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;
+  font-family:var(--body);font-weight:600;font-size:.92rem;padding:11px 22px;border-radius:14px;
+  cursor:pointer;margin-top:12px}
+.btn.ghost{background:none;border:1px solid var(--rule);color:var(--ink-2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.msg{font-size:.85rem;color:var(--muted);margin-top:10px;min-height:1.2em}
+.msg.err{color:var(--sem-maybe)}
+
+.code{font-family:ui-monospace,monospace;font-size:1.35rem;font-weight:700;letter-spacing:.12em;
+  background:var(--accent-soft);color:var(--accent-ink);padding:8px 16px;border-radius:14px;
+  display:inline-block;margin-top:6px}
+.clist{margin-top:16px}
+.crow{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;
+  padding:13px 0;border-bottom:1px solid var(--rule-soft)}
+.crow:last-child{border-bottom:0}
+.cname{font-weight:600}
+.cmeta{font-size:.83rem;color:var(--muted)}
+.link{color:var(--accent);text-decoration:none;font-weight:600;font-size:.88rem;cursor:pointer;
+  background:none;border:0;font-family:var(--body)}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule-soft);
+  border:1px solid var(--rule-soft);border-radius:14px;overflow:hidden;margin-bottom:20px}
+@media(max-width:640px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--panel);padding:20px 22px}
+.kpi-l{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kpi-v{font-family:var(--display);font-size:2.1rem;font-weight:800;letter-spacing:-.04em;margin:8px 0 3px}
+.kpi-s{font-size:.78rem;color:var(--muted)}
+.frow{display:grid;grid-template-columns:150px 1fr auto;gap:14px;align-items:center;padding:9px 0}
+@media(max-width:640px){.frow{grid-template-columns:1fr}}
+.fl{font-size:.9rem;color:var(--ink-2)}
+.ftrack{height:12px;border-radius:14px;background:var(--rule-soft);overflow:hidden}
+.ffill{height:100%;border-radius:14px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+.fn{font-family:var(--display);font-weight:800;font-size:.98rem;text-align:right;
+  font-variant-numeric:tabular-nums}
+.gap{display:grid;grid-template-columns:1fr auto;gap:12px;padding:11px 0;
+  border-bottom:1px solid var(--rule-soft)}
+.gap:last-child{border-bottom:0}
+.gname{font-weight:600;font-size:.94rem}
+.gsub{font-size:.82rem;color:var(--muted);margin-top:2px}
+.gn{font-family:var(--display);font-weight:800;font-size:1.15rem;color:var(--accent)}
+.blocked{background:var(--sem-none-bg);border-radius:14px;padding:18px 20px;
+  font-size:.93rem;color:var(--ink-2);line-height:1.6}
+.privacy{background:var(--sem-strong-bg);border-radius:14px;padding:15px 18px;
+  font-size:.87rem;color:var(--ink-2);line-height:1.6;margin-top:18px}
+.privacy b{color:var(--sem-strong)}
+
+</style>
+<link rel="stylesheet" href="/backdrop.css">
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <span class="par" data-rate="-0.10"><span class="au au1"></span></span>
+  <span class="par" data-rate="-0.05"><span class="au au2"></span></span>
+  <span class="par" data-rate="-0.15"><span class="au au3"></span></span>
+  <span class="par" data-rate="-0.07"><span class="au au4"></span></span>
+  <span class="par" data-rate="-0.09"><span class="orb-breathe"><span class="orb"></span><span class="orb-ring"></span></span></span>
+</div>
+
+
+
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 14.5h10M10 6v8.5M6.5 6h7" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      RejectionIntel
+    </a>
+    <div class="tabs">
+      <a href="/app">Analyse</a>
+      <a href="/track">Tracker</a>
+      <a href="/ghost">Ghost check</a>
+      <a href="/cohort" class="on">Cohort</a>
+      <a href="/employers">Employers</a>
+    </div>
+    <div class="nav-right">
+      <span id="who">Guest</span>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <p class="eyebrow">Cohort</p>
+  <h1>What a whole group's search looks like</h1>
+  <p class="sub">
+    One person's job search can't produce a reliable finding — that's arithmetic,
+    not effort. A batch of twenty can. This is the same analysis, run across a group.
+  </p>
+
+  <div class="panel">
+    <div class="setup">
+      <div>
+        <label for="cname">Create a cohort</label>
+        <input id="cname" placeholder="e.g. Backend Bootcamp, Spring 2026">
+        <button class="btn" id="create" type="button">Create</button>
+        <p class="msg" id="cmsg"></p>
+      </div>
+      <div>
+        <label for="code">Or join one with a code</label>
+        <input id="code" placeholder="e.g. K7PQ2M" style="text-transform:uppercase">
+        <button class="btn ghost" id="join" type="button">Join</button>
+        <p class="msg" id="jmsg"></p>
+      </div>
+    </div>
+    <div class="clist" id="clist"></div>
+  </div>
+
+  <div id="report"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct = v => (v * 100).toFixed(1) + '%';
+
+(function(){
+  $('themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('ri-theme', next); } catch(e){}
+  });
+})();
+
+fetch('/api/auth/me').then(r => r.json())
+  .then(a => { $('who').textContent = a.signed_in ? a.display : 'Guest'; })
+  .catch(() => {});
+
+async function loadMine(){
+  try {
+    const d = await (await fetch('/api/cohort/mine')).json();
+    const all = [
+      ...d.owned.map(c => ({...c, role: 'owner'})),
+      ...d.joined.filter(j => !d.owned.some(o => o.id === j.id))
+                 .map(c => ({...c, role: 'member'})),
+    ];
+    $('clist').innerHTML = all.length ? all.map(c => `
+      <div class="crow">
+        <div>
+          <div class="cname">${esc(c.name)}</div>
+          <div class="cmeta">${c.role === 'owner'
+            ? `you created this · code <b>${esc(c.join_code)}</b> · ${c.members} member${c.members === 1 ? '' : 's'}`
+            : "you're a member"}</div>
+        </div>
+        <button class="link" data-view="${c.id}">View report</button>
+        ${c.role === 'member' ? `<button class="link" data-leave="${c.id}"
+          style="color:var(--muted)">Leave</button>` : '<span></span>'}
+      </div>`).join('')
+      : '<p class="cmeta">No cohorts yet. Create one, or join with a code.</p>';
+
+    $('clist').querySelectorAll('[data-view]').forEach(b =>
+      b.addEventListener('click', () => view(b.dataset.view)));
+    $('clist').querySelectorAll('[data-leave]').forEach(b =>
+      b.addEventListener('click', () => leave(b.dataset.leave)));
+  } catch (e) {}
+}
+
+$('create').addEventListener('click', async () => {
+  const name = $('cname').value.trim();
+  if (!name) { $('cmsg').textContent = 'Give it a name first.'; return; }
+  const fd = new FormData(); fd.append('name', name);
+  const res = await fetch('/api/cohort', {method:'POST', body:fd});
+  const d = await res.json();
+  if (!res.ok) { $('cmsg').textContent = d.detail; $('cmsg').className = 'msg err'; return; }
+  $('cmsg').className = 'msg';
+  $('cmsg').innerHTML = `Created. Share this code:<br><span class="code">${esc(d.join_code)}</span>`;
+  $('cname').value = '';
+  loadMine();
+});
+
+$('join').addEventListener('click', async () => {
+  const code = $('code').value.trim();
+  if (!code) { $('jmsg').textContent = 'Enter a code.'; return; }
+  const fd = new FormData(); fd.append('code', code);
+  const res = await fetch('/api/cohort/join', {method:'POST', body:fd});
+  const d = await res.json();
+  if (!res.ok) { $('jmsg').textContent = d.detail; $('jmsg').className = 'msg err'; return; }
+  $('jmsg').className = 'msg';
+  $('jmsg').textContent = d.already ? `Already in ${d.name}.` : `Joined ${d.name}.`;
+  $('code').value = '';
+  loadMine();
+});
+
+async function leave(id){
+  await fetch(`/api/cohort/${id}/leave`, {method:'POST'});
+  $('report').innerHTML = '';
+  loadMine();
+}
+
+async function view(id){
+  const res = await fetch(`/api/cohort/${id}`);
+  const d = await res.json();
+  if (!res.ok) { $('report').innerHTML = `<div class="panel"><div class="blocked">${esc(d.detail)}</div></div>`; return; }
+
+  if (!d.available) {
+    $('report').innerHTML = `<div class="panel">
+      <p class="eyebrow">Not yet</p>
+      <div class="blocked">${esc(d.blocked_reason)}</div></div>`;
+    return;
+  }
+
+  const f = d.funnel, total = f.submitted || 1;
+  const rows = [['Applied', f.submitted], ['Got a reply', f.screen],
+                ['Interviewed', f.interview], ['Final round', f.final],
+                ['Offer', f.offer]];
+
+  $('report').innerHTML = `
+    <div class="panel">
+      <p class="eyebrow">Group report</p>
+      <h2 style="margin-bottom:18px">${d.n_members} people, ${d.n_applications} applications</h2>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi-l">How often they hear back</div>
+          <div class="kpi-v">${pct(d.response_rate)}</div>
+          <div class="kpi-s">really between ${pct(d.ci[0])} and ${pct(d.ci[1])}</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">Applications per person</div>
+          <div class="kpi-v">${Math.round(d.n_applications / d.n_members)}</div>
+          <div class="kpi-s">across ${d.n_members} people</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-l">Offers</div>
+          <div class="kpi-v">${d.offers}</div>
+          <div class="kpi-s">${d.offers === 0 ? 'none, or too few to show' : 'across the group'}</div>
+        </div>
+      </div>
+
+      ${rows.map(([label, n]) => `
+        <div class="frow">
+          <span class="fl">${label}</span>
+          <div class="ftrack"><div class="ffill" style="width:${(n / total * 100).toFixed(1)}%"></div></div>
+          <span class="fn">${n}</span>
+        </div>`).join('')}
+    </div>
+
+    ${d.skill_gaps.length ? `<div class="panel">
+      <p class="eyebrow">Curriculum signal</p>
+      <h2 style="margin-bottom:6px">What their job ads keep asking for</h2>
+      <p class="sub" style="margin-bottom:16px">Counted across every advert this group
+        applied to. These are counts, not predictions — but they're what the market
+        is asking your people for.</p>
+      ${d.skill_gaps.map(g => `
+        <div class="gap">
+          <div>
+            <div class="gname">${esc(g.skill)}</div>
+            <div class="gsub">appeared in ${g.asked_by} of their applications</div>
+          </div>
+          <div class="gn">${pct(g.share)}</div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <div class="privacy">
+      <b>What this report can't show you.</b> Any figure describing fewer than three
+      people is suppressed rather than rounded, and the whole report is withheld below
+      eight members. A group report is read by people who know everyone in it by name —
+      "one person got an offer" in a batch of twelve identifies someone, and so does
+      the absence of a number.
+    </div>`;
+  $('report').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+loadMine();
+</script>
+<script src="/backdrop.js"></script>
+</body>
+</html>

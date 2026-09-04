@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which employers actually reply — RejectionIntel</title>
+<meta name="description" content="Measured reply rates by employer, from real application outcomes. Counts, not opinions.">
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('ri-theme');
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F7FB;--card:#FFFFFF;
+  --paper:#F7F7FB;--panel:#FFFFFF;
+  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
+  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+
+  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+
+  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
+  --t-insufficient:#78809A;
+  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+
+  --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
+  --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
+  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
+
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
+  --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
+  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+}
+[data-theme="dark"]{
+  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
+  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
+  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+
+  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+
+  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
+  --t-insufficient:#8891A6;
+  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
+  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+
+  --sem-strong:#3FC495;--sem-strong-bg:#10352A;
+  --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
+  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:10px}
+h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.034em;margin:0;line-height:1.12}
+
+.nav{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule)}
+.nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);
+  margin:0 auto;padding:0 26px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;
+  font-size:1.04rem;letter-spacing:-.03em;text-decoration:none;color:inherit}
+.brand-mark{width:28px;height:28px;border-radius:14px;flex:none;display:grid;place-items:center;
+  background:linear-gradient(140deg,var(--accent),var(--accent-2))}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.nav-right a{font-size:.88rem;color:var(--muted);text-decoration:none}
+.nav-right a:hover{color:var(--ink)}
+.theme-btn{width:36px;height:36px;border-radius:14px;border:1px solid var(--rule);
+  background:var(--panel);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;padding:0}
+.theme-btn svg{width:16px;height:16px}
+.theme-btn .moon{display:none}
+[data-theme="dark"] .theme-btn .moon{display:block}
+[data-theme="dark"] .theme-btn .sun{display:none}
+
+.wrap{max-width:var(--wrap);margin:0 auto;padding:40px 26px 90px}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent-ink);margin:0 0 10px}
+h1{font-size:clamp(1.9rem,4vw,2.7rem)}
+.lede{color:var(--ink-2);font-size:1.04rem;margin:16px 0 0;max-width:62ch;line-height:1.62}
+
+.notice{background:var(--sem-none-bg);border-radius:14px;padding:20px 22px;margin-top:26px;
+  font-size:.92rem;color:var(--ink-2);line-height:1.65}
+.notice b{color:var(--ink)}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;
+  padding:24px;margin-top:24px}
+.tabs{display:flex;gap:5px;padding:5px;border-radius:14px;background:var(--rule-soft);
+  width:fit-content;margin-bottom:20px}
+.tabs button{border:0;background:none;font:inherit;font-size:.88rem;font-weight:500;
+  color:var(--muted);padding:8px 16px;border-radius:14px;cursor:pointer}
+.tabs button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(14,16,23,.12)}
+
+.erow{display:grid;grid-template-columns:1fr 200px auto;gap:16px;align-items:center;
+  padding:15px 0;border-bottom:1px solid var(--rule-soft)}
+.erow:last-child{border-bottom:0}
+@media(max-width:720px){.erow{grid-template-columns:1fr auto}.ebar{display:none}}
+.ename{font-weight:600;font-size:.98rem}
+.estat{font-size:.83rem;color:var(--muted);margin-top:3px;line-height:1.5}
+.ebar{position:relative;height:24px}
+.ebar-track{position:absolute;inset:0;border-radius:7px;background:var(--rule-soft)}
+.ebar-ci{position:absolute;top:0;bottom:0;border-radius:7px;
+  background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.ebar-pt{position:absolute;top:2px;bottom:2px;width:3px;border-radius:2px;background:var(--accent)}
+.erate{font-family:var(--display);font-weight:800;font-size:1.2rem;text-align:right;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.erate.zero{color:var(--sem-maybe)}
+.empty{color:var(--muted);font-size:.93rem;line-height:1.6}
+.gate{font-size:.85rem;color:var(--muted);margin-top:18px;padding-top:16px;
+  border-top:1px solid var(--rule-soft);line-height:1.6}
+
+.sample{background:var(--sem-maybe-bg);border-radius:14px;padding:18px 22px;
+  margin-top:26px;font-size:.93rem;color:var(--ink-2);line-height:1.65}
+.sample b{color:var(--sem-maybe)}
+
+</style>
+<link rel="stylesheet" href="/backdrop.css">
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <span class="par" data-rate="-0.10"><span class="au au1"></span></span>
+  <span class="par" data-rate="-0.05"><span class="au au2"></span></span>
+  <span class="par" data-rate="-0.15"><span class="au au3"></span></span>
+  <span class="par" data-rate="-0.07"><span class="au au4"></span></span>
+  <span class="par" data-rate="-0.09"><span class="orb-breathe"><span class="orb"></span><span class="orb-ring"></span></span></span>
+</div>
+
+
+
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/">
+      <span class="brand-mark">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5 14.5h10M10 6v8.5M6.5 6h7" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+      </span>
+      RejectionIntel
+    </a>
+    <div class="nav-right">
+      <a href="/ghost">Ghost check</a>
+      <a href="/app">Analyse my search</a>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <p class="eyebrow">Reply index</p>
+  <h1>Which employers actually reply</h1>
+  <p class="lede">
+    Measured from real application outcomes, not from reading job adverts.
+    These are counts of what happened after people applied.
+  </p>
+
+  <div id="sampleBanner"></div>
+
+  <div class="notice">
+    <b>Read this as a reason to spend your time elsewhere, not as an accusation.</b>
+    A hiring freeze, a broken applicant tracker and a deliberate pipeline post are
+    indistinguishable from the outside. We report what happened and let you decide.
+    Nothing here describes intent, and no company is named unless several
+    independent people have applied to it.
+  </div>
+
+  <div class="panel">
+    <div class="tabs">
+      <button class="on" data-view="least">Least responsive</button>
+      <button data-view="most">Most responsive</button>
+    </div>
+    <div id="list"></div>
+    <p class="gate" id="gate"></p>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c =>
+  ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct = v => (v * 100).toFixed(0) + '%';
+
+(function(){
+  $('themeBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('ri-theme', next); } catch(e){}
+  });
+})();
+
+let DATA = null, VIEW = 'least';
+
+document.querySelectorAll('.tabs button').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+    VIEW = b.dataset.view;
+    render();
+  });
+});
+
+function render(){
+  if (!DATA) return;
+  const rows = VIEW === 'least' ? DATA.least_responsive : DATA.most_responsive;
+
+  if (!rows || !rows.length) {
+    $('list').innerHTML = `<p class="empty">No company has passed the threshold yet.
+      That's the gate doing its job — one person's experience with a company name
+      attached isn't data.</p>`;
+    $('gate').textContent = DATA.gate || '';
+    return;
+  }
+
+  // Bars are drawn on a shared scale so two rows can be compared directly.
+  const max = Math.max(0.1, ...rows.map(r => r.ci[1]));
+
+  $('list').innerHTML = rows.map(r => `
+    <div class="erow">
+      <div>
+        <div class="ename">${esc(r.company)}</div>
+        <div class="estat">${esc(r.statement)}</div>
+      </div>
+      <div class="ebar">
+        <div class="ebar-track"></div>
+        <div class="ebar-ci" style="left:${(r.ci[0] / max * 100).toFixed(1)}%;
+             width:${((r.ci[1] - r.ci[0]) / max * 100).toFixed(1)}%"></div>
+        <div class="ebar-pt" style="left:${(r.rate / max * 100).toFixed(1)}%"></div>
+      </div>
+      <div class="erate ${r.replies === 0 ? 'zero' : ''}">${pct(r.rate)}</div>
+    </div>`).join('');
+
+  $('gate').textContent = DATA.gate;
+}
+
+fetch('/api/employers').then(r => r.json()).then(d => {
+  DATA = d;
+
+  // Never show invented numbers without saying they're invented.
+  if (d.is_sample) {
+    $('sampleBanner').innerHTML = `
+      <div class="sample">
+        <b>This is sample data.</b> Every company below is fictional and the
+        outcomes were generated, so the page can be demonstrated before enough
+        real applications exist. No real employer is described here. Once real
+        usage arrives this notice disappears and the names become measured.
+      </div>`;
+  }
+  if (!d.available) {
+    $('list').innerHTML = `<p class="empty">Not enough data yet. A company appears
+      here only once several independent people have applied to it — until then,
+      publishing a name would be publishing one person's bad week.</p>`;
+    $('gate').textContent = d.gate || '';
+    return;
+  }
+  render();
+}).catch(() => {
+  $('list').innerHTML = '<p class="empty">Could not load the index.</p>';
+});
+</script>
+<script src="/backdrop.js"></script>
+</body>
+</html>

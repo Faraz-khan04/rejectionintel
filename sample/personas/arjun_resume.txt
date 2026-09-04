@@ -1,0 +1,37 @@
+ARJUN MEHTA
+Backend Engineer | Bengaluru, India
+arjun.mehta@example.com | +91 98111 22334 | github.com/arjunmehta
+
+SUMMARY
+Backend engineer with five years building payment and billing services in Java.
+Strongest on API design, relational data modelling and getting things to production.
+
+EXPERIENCE
+
+Senior Backend Engineer, Corvus Systems                      2023 - present
+- Built the settlement service in Java and Spring Boot, processing 40,000
+  transactions a day with no unplanned downtime in eighteen months.
+- Redesigned the REST APIs for the partner integration platform, cutting median
+  response time from 380ms to 110ms.
+- Owned the SQL schema for the billing domain across four services.
+- Containerised six services with Docker, taking local setup from a day to
+  twenty minutes.
+- Mentored two junior engineers through their first production releases.
+
+Backend Engineer, Bytehold                                   2021 - 2023
+- Shipped the refunds pipeline handling 12,000 requests a month.
+- Wrote the reconciliation job that closed a 0.4% ledger discrepancy.
+- Moved the team from manual releases to Git-based deploys.
+
+Software Engineer, Perch                                     2020 - 2021
+- Maintained internal reporting services in Java.
+- Fixed a long-standing race condition in the invoice generator.
+
+EDUCATION
+B.Tech Computer Science, VIT Vellore, 2020
+
+SKILLS
+Java, Spring, SQL, REST APIs, Docker, Git, Maven, JUnit, PostgreSQL
+
+CERTIFICATIONS
+Oracle Certified Professional, Java SE 11, 2022

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+:root{
+  --bg:#0A0B11;--card:#14161F;--ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
+  --line:#252938;--accent:#8B7BFF;--accent-2:#A78BFA;--ok:#3FC495;--warn:#E0A93A;
+}
+*{box-sizing:border-box}
+body{margin:0;width:330px;background:var(--bg);color:var(--ink);
+  font:14px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{padding:16px}
+h1{font-size:15px;margin:0 0 3px;letter-spacing:-.01em}
+.sub{font-size:11.5px;color:var(--muted);margin:0 0 14px}
+label{display:block;font-size:11px;color:var(--muted);margin:12px 0 5px;
+  text-transform:uppercase;letter-spacing:.07em}
+input{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);
+  background:#0F1118;color:var(--ink);font:12px ui-monospace,monospace}
+input:focus{outline:2px solid var(--accent);outline-offset:1px}
+button{width:100%;margin-top:12px;padding:9px;border:0;border-radius:9px;cursor:pointer;
+  background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#0A0B11;
+  font-weight:600;font-size:13px}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink-2);margin-top:8px}
+.row{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.row:last-child{border-bottom:0}
+.row b{font-weight:600}
+.pill{font-size:10.5px;padding:2px 8px;border-radius:999px;background:#1F2431;color:var(--muted)}
+.pill.ok{background:rgba(63,196,149,.16);color:var(--ok)}
+.pill.warn{background:rgba(224,169,58,.16);color:var(--warn)}
+.msg{font-size:11.5px;margin-top:10px;color:var(--muted);line-height:1.5}
+.msg.err{color:var(--warn)}
+.hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RejectionIntel</h1>
+  <p class="sub">Captures applications as you apply.</p>
+
+  <div class="row"><span>Status</span><span class="pill" id="status">checking…</span></div>
+  <div class="row"><span>Waiting to send</span><b id="queued">0</b></div>
+
+  <label for="endpoint">Server</label>
+  <input id="endpoint" placeholder="http://127.0.0.1:8000">
+
+  <label for="token">API token</label>
+  <input id="token" placeholder="paste from the app" type="password">
+  <p class="hint">Sign in at the app, then Settings &rarr; copy your token.</p>
+
+  <button id="save">Save</button>
+  <button class="ghost" id="capture">Capture this page manually</button>
+  <button class="ghost" id="flush">Retry queued</button>
+
+  <p class="msg" id="msg"></p>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

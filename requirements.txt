@@ -1,0 +1,22 @@
+fastapi>=0.115
+uvicorn[standard]>=0.32
+sqlalchemy>=2.0
+alembic>=1.14
+psycopg[binary]>=3.2
+python-multipart>=0.0.20
+jinja2>=3.1
+pdfplumber>=0.11          # PDF resume parsing
+python-docx>=1.1          # DOCX resume parsing
+scipy>=1.14
+numpy>=2.0
+# Pick ONE narration provider (or neither — templates work without both):
+# google-genai>=1.0      # Gemini, has a free tier
+# anthropic>=0.40        # Claude
+pydantic>=2.9
+
+# Optional: only needed when QUEUE_BACKEND=rq
+# rq>=1.16
+# redis>=5.0
+
+# Required by the FastAPI test client (tests/test_routes.py)
+httpx>=0.27
