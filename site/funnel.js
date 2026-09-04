@@ -69,8 +69,8 @@
       return { ...s, count, rate, lo: ci[0], hi: ci[1] };
     });
 
-    const accent = cssVar("--accent", "#5A47E0");
-    const accent2 = cssVar("--accent-2", "#8B5CF6");
+    const accent = cssVar("--accent", "#255C99");
+    const accent2 = cssVar("--accent-2", "#3B7EBF");
 
     const muted = cssVar("--muted", "#6E7691");
     const ink = cssVar("--ink", "#0E1017");
@@ -116,7 +116,7 @@
     // Indigo through violet to cyan. The eye reads a colour change as
     // progress, so the offer row stops looking like "the smallest bar" and
     // starts looking like the end of a journey.
-    const RAMP = ["#5A47E0", "#7B5CF0", "#8B5CF6", "#4C9BE8", "#22C7CB"];
+    const RAMP = ["#1B4670", "#255C99", "#3B7EBF", "#5AA9E6", "#79C6E8"];
     const ramp = d3.scaleOrdinal()
         .domain(d3.range(RAMP.length))
         .range(RAMP);
