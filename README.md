@@ -9,6 +9,14 @@ and narrates the result. The distinguishing feature is not the analysis — it i
 the **refusal to overclaim**. "We don't know yet" is a designed screen, not a
 failure state.
 
+![Landing page](docs/screenshots/home.png)
+
+![Funnel analysis](docs/screenshots/funnel.png)
+
+![Findings, each labelled with how strong the evidence is](docs/screenshots/findings.png)
+
+**Stack:** Python, FastAPI, SQLAlchemy (SQLite or Postgres), optional Gemini/Claude narration, D3.js front end, Chrome extension for capturing applications.
+
 ---
 
 ## Running it
