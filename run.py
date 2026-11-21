@@ -103,7 +103,17 @@ def main() -> None:
         print(f"Narration: templates — {st.reason}")
     print(f"Open:    http://127.0.0.1:{port}\n")
 
-    uvicorn.run("api.main:app", host="127.0.0.1", port=port, reload=True)
+    # reload= and host= are development defaults. Auto-reload watches the
+    # filesystem and will restart in the middle of a request, and 127.0.0.1 is
+    # unreachable from outside a container. In production a process manager
+    # runs uvicorn or gunicorn directly and never comes through here.
+    dev = os.environ.get("ENV", "dev").strip().lower() != "production"
+    uvicorn.run(
+        "api.main:app",
+        host=os.environ.get("HOST", "127.0.0.1" if dev else "0.0.0.0"),
+        port=port,
+        reload=dev,
+    )
 
 
 if __name__ == "__main__":

@@ -38,6 +38,8 @@ reader decide.
 
 from __future__ import annotations
 
+import re
+
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -192,6 +194,11 @@ def analyse(apps, today: date | None = None) -> GhostReport:
 
 # Signals drawn from published ghost-job research. Each is weak alone; the point
 # is to count them, show which fired, and let the reader judge.
+# Each check carries a CATEGORY. "No salary range" and "asks for your bank
+# details before an interview" are both worth flagging and are not the same
+# kind of claim — one says the posting may not be a real vacancy, the other
+# says it may not be a real employer. Counting them in one total would let two
+# scam signals produce the same verdict as two scoping signals.
 LISTING_CHECKS = [
     ("no_salary", "No salary range",
      "Legitimate postings increasingly include one, and several jurisdictions "
@@ -205,7 +212,37 @@ LISTING_CHECKS = [
      "resume collection, not a vacancy."),
     ("wide_range", "Requirements span several different jobs",
      "A wish list for three people often means the role isn't defined yet."),
+    ("no_specifics", "No named tools, systems or methods",
+     "A role someone actually needs filled names the things you would use in "
+     "it. This posting names none our vocabulary recognises."),
+    ("title_mismatch", "Experience demanded doesn't match the level advertised",
+     "An entry-level title asking for five or more years is usually a template "
+     "nobody reread, or a role that was never scoped."),
+    ("urgency", "Pressure to apply immediately",
+     "Countdown language belongs to advertising, not hiring. A funded role is "
+     "still open next week."),
+    ("personal_contact", "Apply via a personal address or messaging app",
+     "A real employer receives applications through its own domain or an "
+     "applicant tracking system."),
+    ("upfront_ask", "Asks for money or sensitive details before an interview",
+     "No legitimate employer needs your bank details, passport or a training "
+     "fee before it has spoken to you."),
 ]
+
+# Which of the above describe a posting that may not be a real VACANCY, and
+# which describe an employer that may not be a real EMPLOYER.
+SCAM_KEYS = {"personal_contact", "upfront_ask"}
+
+_URGENCY = ("apply now", "immediate start", "positions filling fast",
+            "limited seats", "act fast", "don't miss out", "urgent hiring",
+            "start tomorrow", "hiring immediately")
+_PERSONAL_CONTACT = ("@gmail.com", "@yahoo.com", "@hotmail.com", "@outlook.com",
+                     "whatsapp", "telegram", "text me at", "sms your cv")
+_UPFRONT = ("registration fee", "training fee", "security deposit",
+            "processing fee", "bank account details", "passport copy",
+            "social security number", "pay for your own equipment upfront")
+_JUNIOR_TITLES = ("entry level", "entry-level", "junior", "graduate",
+                  "intern", "trainee", "fresher")
 
 _VAGUE_HINTS = ("fast-paced", "wear many hats", "rockstar", "ninja", "self-starter",
                 "dynamic environment", "other duties as assigned")
@@ -220,7 +257,43 @@ def check_listing(jd_text: str) -> dict:
     turning that into "68% likely fake" would be inventing a precision the
     inputs cannot support.
     """
-    text = (jd_text or "").lower()
+    raw = jd_text or ""
+    text = raw.lower()
+
+    def _pattern(phrase: str) -> str:
+        """A phrase, tolerant of however the posting wrapped it.
+
+        Job descriptions wrap. "registration fee" arrives as "registration\nfee"
+        and a plain substring test misses it — which silently disabled every
+        multi-word check in this file on any posting long enough to wrap,
+        including "wear many hats" and "always looking".
+        """
+        return r"\s+".join(re.escape(w) for w in phrase.split())
+
+    def hit(phrase: str) -> bool:
+        return re.search(_pattern(phrase), raw, re.I) is not None
+
+    def spans_for(needles) -> list[str]:
+        """The literal text that fired a signal, sliced from the original.
+
+        Sliced, never reconstructed: the string handed back is exactly what the
+        user typed, casing and all. That is the same rule evidence.py applies
+        to employer quotes — a paraphrase is an inference wearing a quotation,
+        and a highlight that does not match the page is worse than no
+        highlight, because the reader stops trusting the ones that do.
+        """
+        out, seen = [], set()
+        for n in needles:
+            m = re.search(_pattern(n), raw, re.I)
+            if not m:
+                continue
+            literal = m.group(0)          # sliced from the original, wrap and all
+            key = " ".join(literal.lower().split())
+            if key not in seen:
+                seen.add(key)
+                out.append(" ".join(literal.split()))
+        return out
+
     if len(text) < 80:
         return {"checked": False,
                 "note": "Too little text to check. Paste the full posting."}
@@ -232,14 +305,14 @@ def check_listing(jd_text: str) -> dict:
     if not has_salary:
         fired.append("no_salary")
 
-    if sum(1 for h in _VAGUE_HINTS if h in text) >= 2:
+    if sum(1 for h in _VAGUE_HINTS if hit(h)) >= 2:
         fired.append("vague")
 
-    if not any(t in text for t in ("report to", "reporting to", "you'll join",
-                                   "you will join", "the team", "our team")):
+    if not any(hit(t) for t in ("report to", "reporting to", "you'll join",
+                                "you will join", "the team", "our team")):
         fired.append("no_team")
 
-    if any(t in text for t in _EVERGREEN):
+    if any(hit(t) for t in _EVERGREEN):
         fired.append("evergreen")
 
     # A posting demanding many senior-sounding areas at once often isn't scoped.
@@ -249,14 +322,67 @@ def check_listing(jd_text: str) -> dict:
     if areas >= 5:
         fired.append("wide_range")
 
-    detail = [{"key": k, "label": l, "why": w}
+    # A posting that names no tool, system or method our 391-skill vocabulary
+    # recognises has told the reader nothing they could prepare for. Gated on
+    # length so a genuinely short advert is not punished for being short.
+    named = 0
+    if len(text.split()) >= 150:
+        from core.deterministic import default_vocab
+        named = len(default_vocab().find(raw))
+        if named == 0:
+            fired.append("no_specifics")
+
+    # An entry-level title asking for years of experience.
+    if any(hit(j) for j in _JUNIOR_TITLES):
+        yrs = re.findall(r"(\d{1,2})\s*\+?\s*years", text)
+        if yrs and max(int(y) for y in yrs) >= 5:
+            fired.append("title_mismatch")
+
+    if any(hit(u) for u in _URGENCY):
+        fired.append("urgency")
+
+    if any(hit(c) for c in _PERSONAL_CONTACT):
+        fired.append("personal_contact")
+
+    if any(hit(u) for u in _UPFRONT):
+        fired.append("upfront_ask")
+
+    # Only three of the five signals have a literal match. no_salary and
+    # no_team fire on ABSENCE, and there is no substring to point at when the
+    # finding is that something is missing — the UI has to say so rather than
+    # highlight an arbitrary line.
+    evidence = {
+        "vague": spans_for(_VAGUE_HINTS),
+        "evergreen": spans_for(_EVERGREEN),
+        "wide_range": spans_for(("engineering", "marketing", "sales", "design",
+                                 "operations", "finance", "product", "support")),
+        "urgency": spans_for(_URGENCY),
+        "personal_contact": spans_for(_PERSONAL_CONTACT),
+        "upfront_ask": spans_for(_UPFRONT),
+        "title_mismatch": spans_for(_JUNIOR_TITLES),
+    }
+
+    detail = [{"key": k, "label": l, "why": w, "spans": evidence.get(k, []),
+               "category": "scam" if k in SCAM_KEYS else "listing"}
               for k, l, w in LISTING_CHECKS if k in fired]
 
-    if not fired:
+    scam_hits = [k for k in fired if k in SCAM_KEYS]
+    listing_hits = [k for k in fired if k not in SCAM_KEYS]
+
+    # Ten checks, not five, so the bands moved with them. Leaving "3 or more"
+    # as the top band would have made an ordinary posting that trips three
+    # scoping checks read the same as one that trips six.
+    #
+    # A scam signal is not scored on the same scale at all: one is enough.
+    if scam_hits:
+        verdict = ("This asks for something a real employer would not ask for "
+                   "at this stage. Verify the company independently before you "
+                   "reply — not through any link or address in this posting.")
+    elif not listing_hits:
         verdict = "Nothing unusual. This reads like a real, scoped role."
-    elif len(fired) == 1:
+    elif len(listing_hits) == 1:
         verdict = "One thing worth noticing, but plenty of real postings look like this."
-    elif len(fired) == 2:
+    elif len(listing_hits) <= 3:
         verdict = "A couple of signals. Worth checking the company's own careers page."
     else:
         verdict = ("Several signals at once. Check the company careers page before "
@@ -319,8 +445,8 @@ def check_with_history(jd_text: str, company: str = "",
         "listing": listing,
         "prior": prior,
         "upgrade_note": (
-            "This reads the advert only. The signal that actually predicts "
+            "This reads the job description only. The signal that actually predicts "
             "silence is which employers have ignored you before — and that "
-            "needs your application history, not one job ad."
+            "needs your application history, not one job description."
         ) if prior is None else "",
     }

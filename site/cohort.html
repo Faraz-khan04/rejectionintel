@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cohort — RejectionIntel</title>
+<title>Groups — RejectionIntel</title>
 <script>
 (function(){
   try{
@@ -18,43 +18,47 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F7FB;--card:#FFFFFF;
-  --paper:#F7F7FB;--panel:#FFFFFF;
-  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
-  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+  --bg:#F4F3F0;--card:#FCFBF9;
+  --paper:#F4F3F0;--panel:#FCFBF9;
+  /* Aliases, not a second palette. Both names point at the same value so a
+     future edit to one cannot leave the other stale. */
+  --bg-app:var(--bg);--bg-card:var(--card);
+  --ink:#111112;--ink-2:#44454A;--muted:#6E7076;
+  --line:#E0DFDA;--line-2:#ECEBE7;--rule:#E0DFDA;--rule-soft:#ECEBE7;
 
-  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--accent-ink:#3A3A3F;--on-accent:#FCFBF9;
 
-  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
-  --t-insufficient:#78809A;
-  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
-  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+  --t-observed:#0E8A5F;--t-strong:#111112;--t-weak:#C4820E;--t-none:#7F7F86;
+  --t-insufficient:#7F7F86;
+  --bg-observed:#E3F5ED;--bg-strong:#E4E3DE;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E4E3DE;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
 
   --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
   --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
-  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-none:#66666D;--sem-none-bg:#EDEFF4;
   --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
 
   --display:'Plus Jakarta Sans',system-ui,sans-serif;
   --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
   --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
-  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+  --shadow:0 1px 2px rgba(17,17,18,.04), 0 12px 28px -12px rgba(17,17,18,.10);
 }
 [data-theme="dark"]{
-  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
-  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
-  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+  --bg:#08080A;--card:#141416;
+  --bg-app:var(--bg);--bg-card:var(--card);--paper:#08080A;--panel:#141416;
+  --ink:#E8E8E4;--ink-2:#9A9AA1;--muted:#7E7E85;
+  --line:#26262A;--line-2:#1C1C1F;--rule:#26262A;--rule-soft:#1C1C1F;
 
-  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--accent-ink:#C7C7C9;--on-accent:#08080A;
 
-  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
-  --t-insufficient:#8891A6;
-  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
-  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+  --t-observed:#3FC495;--t-strong:#E8E8E4;--t-weak:#E0A93A;--t-none:#8C8C93;
+  --t-insufficient:#8C8C93;
+  --bg-observed:#10352A;--bg-strong:#232326;--bg-weak:#3A2E14;--bg-none:#1F1F23;
+  --observed-bg:#10352A;--strong-bg:#232326;--weak-bg:#3A2E14;--insufficient-bg:#1F1F23;
 
   --sem-strong:#3FC495;--sem-strong-bg:#10352A;
   --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
-  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-none:#8C8C93;--sem-none-bg:#1F1F23;
   --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
   color-scheme:dark;
 }
@@ -64,7 +68,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
 :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:10px}
 h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.033em;margin:0;line-height:1.12}
 
-.nav{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule)}
+.nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px) saturate(1.05);border-bottom:1px solid var(--rule)}
 .nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);
   margin:0 auto;padding:0 26px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;
@@ -74,7 +78,7 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.033em;margin:0
 .tabs{display:flex;gap:4px;margin-left:20px;padding:4px;border-radius:14px;background:var(--rule-soft)}
 .tabs a{font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;
   padding:7px 15px;border-radius:14px}
-.tabs a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(14,16,23,.12)}
+.tabs a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(17,17,18,.12)}
 @media(max-width:800px){.tabs{display:none}}
 .nav-right{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:.85rem;color:var(--muted)}
 .theme-btn{width:36px;height:36px;border-radius:14px;border:1px solid var(--rule);
@@ -88,15 +92,44 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.033em;margin:0
 .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
   color:var(--accent-ink);margin:0 0 9px}
 .sub{color:var(--muted);font-size:.95rem;margin:10px 0 0;max-width:64ch}
+.matte .stage,.matte .grain,.matte .contour{display:none}
+body.matte{background:var(--bg-app)}
+
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;
   padding:26px;margin-top:22px}
+
+/* ---- action cards ----
+   Two self-contained cards rather than two columns of a shared panel. Each one
+   states its own outcome, so a reader picks a path by reading one card instead
+   of comparing two halves of a form. */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}
+@media(max-width:820px){.acts{grid-template-columns:1fr}}
+.act{background:var(--bg-card);border:1px solid var(--rule);border-radius:16px;
+  padding:24px;display:flex;flex-direction:column}
+.act h2{font-family:var(--display);font-size:1.12rem;font-weight:700;
+  letter-spacing:-.02em;margin:0 0 6px}
+.act .why{font-size:.86rem;color:var(--muted);line-height:1.55;margin:0 0 18px}
+.act .btn{margin-top:14px;align-self:flex-start}
+.act .msg{margin-top:10px}
+
+/* ---- guest banner ----
+   Above the actions, not under them: the constraint has to arrive before the
+   effort, or the reader types a group name and is refused. */
+.gate{display:flex;gap:13px;align-items:flex-start;margin-top:24px;
+  padding:14px 16px;border-radius:14px;
+  background:var(--sem-maybe-bg);border:1px solid var(--sem-maybe);
+  color:var(--ink)}
+.gate[hidden]{display:none}
+.gate svg{width:17px;height:17px;flex:none;margin-top:2px;color:var(--sem-maybe)}
+.gate p{margin:0;font-size:.88rem;line-height:1.55}
+.gate a{color:var(--ink);font-weight:600}
 
 .setup{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 @media(max-width:760px){.setup{grid-template-columns:1fr}}
 label{display:block;font-size:.8rem;font-weight:600;color:var(--ink-2);margin-bottom:7px}
 input{width:100%;padding:11px 13px;border-radius:14px;border:1px solid var(--rule);
   background:var(--paper);color:var(--ink);font-family:var(--body);font-size:.92rem}
-.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:var(--on-accent);border:0;
   font-family:var(--body);font-weight:600;font-size:.92rem;padding:11px 22px;border-radius:14px;
   cursor:pointer;margin-top:12px}
 .btn.ghost{background:none;border:1px solid var(--rule);color:var(--ink-2)}
@@ -143,10 +176,16 @@ input{width:100%;padding:11px 13px;border-radius:14px;border:1px solid var(--rul
 .privacy b{color:var(--sem-strong)}
 
 </style>
-<link rel="stylesheet" href="/backdrop.css">
+<link rel="stylesheet" href="/backdrop.css?v=3">
 </head>
-<body>
+<body class="matte">
 
+<!-- MATTE
+     The backdrop markup stays. `.matte` on <body> hides the moving layers on
+     this page only, so the decision is one class to flip rather than markup to
+     restore. Worth knowing: this is currently the only page of nine without
+     the orb, which will read as an inconsistency until the same class goes on
+     the rest — or comes off here. -->
 <div class="stage" aria-hidden="true">
   <span class="par" data-rate="-0.10"><span class="au au1"></span></span>
   <span class="par" data-rate="-0.05"><span class="au au2"></span></span>
@@ -171,12 +210,13 @@ input{width:100%;padding:11px 13px;border-radius:14px;border:1px solid var(--rul
     <div class="tabs">
       <a href="/app">Analyse</a>
       <a href="/track">Tracker</a>
-      <a href="/ghost">Ghost check</a>
-      <a href="/cohort" class="on">Cohort</a>
+      <a href="/ghost">Ghost check</a><a href="/pre-apply">Before you apply</a>
+      <a href="/cohort" class="on">Groups</a>
       <a href="/employers">Employers</a>
     </div>
     <div class="nav-right">
-      <span id="who">Guest</span>
+      <div id="ri-authbox"></div>
+      <span id="who" hidden>Guest</span>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -186,28 +226,67 @@ input{width:100%;padding:11px 13px;border-radius:14px;border:1px solid var(--rul
 </nav>
 
 <div class="wrap">
-  <p class="eyebrow">Cohort</p>
-  <h1>What a whole group's search looks like</h1>
+  <p class="eyebrow">Groups</p>
+  <h1>Is it the market, or is it you?</h1>
   <p class="sub">
-    One person's job search can't produce a reliable finding — that's arithmetic,
-    not effort. A batch of twenty can. This is the same analysis, run across a group.
+    On your own you cannot tell. Twelve rejections could mean your resume is
+    weak, or it could mean nobody in your field is getting replies this quarter
+    — and the difference decides whether you rewrite anything.
+  </p>
+  <p class="sub">
+    Pool your applications with a bootcamp cohort, a university class, or a few
+    friends job hunting at the same time, and the answer becomes visible: the
+    same analysis, run across everyone at once.
   </p>
 
-  <div class="panel">
-    <div class="setup">
-      <div>
-        <label for="cname">Create a cohort</label>
-        <input id="cname" placeholder="e.g. Backend Bootcamp, Spring 2026">
-        <button class="btn" id="create" type="button">Create</button>
-        <p class="msg" id="cmsg"></p>
-      </div>
-      <div>
-        <label for="code">Or join one with a code</label>
-        <input id="code" placeholder="e.g. K7PQ2M" style="text-transform:uppercase">
-        <button class="btn ghost" id="join" type="button">Join</button>
-        <p class="msg" id="jmsg"></p>
-      </div>
+  <div class="gate" id="needauth" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/>
+    </svg>
+    <p><b>You will need an account first.</b> A guest session has nowhere to
+      belong, so it cannot be counted as a member of a group.
+      <a href="/signin">Sign in or create one</a> — it takes a minute, and you
+      keep working as a guest until you do.</p>
+  </div>
+
+  <div class="acts">
+    <div class="act">
+      <h2>Start a group</h2>
+      <p class="why">You get a six-character code to share. Everyone who joins
+        with it is counted, and you can watch the group fill up before any
+        report appears.</p>
+      <label for="cname">What is this group called?</label>
+      <input id="cname" placeholder="e.g. Backend Bootcamp, Spring 2026">
+      <button class="btn" id="create" type="button">Generate invite code</button>
+      <p class="msg" id="cmsg"></p>
     </div>
+
+    <div class="act">
+      <h2>Join a group</h2>
+      <p class="why">Someone running a group will have sent you a code. Joining
+        adds your applications to the totals — never to anyone's screen.</p>
+      <label for="code">Your six-character code</label>
+      <input id="code" placeholder="e.g. K7PQ2M" style="text-transform:uppercase"
+             maxlength="6" autocomplete="off">
+      <button class="btn ghost" id="join" type="button">Join group</button>
+      <p class="msg" id="jmsg"></p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 style="font-family:var(--display);font-size:1.05rem;margin:0 0 10px">
+      What everyone else can see about you</h2>
+    <p style="font-size:.9rem;color:var(--ink-2);line-height:1.6;margin:0">
+      <b>Nothing.</b> Not the companies you applied to, not the roles, not how
+      many times you were turned down. A group report shows totals only — how
+      the group as a whole is doing.
+    </p>
+    <p style="font-size:.9rem;color:var(--ink-2);line-height:1.6;margin:10px 0 0">
+      It also stays locked until <b>eight people have joined</b>. In a group of
+      three, a total is a person: subtract your own numbers and you have someone
+      else's. Eight is the smallest size where that stops working.
+    </p>
     <div class="clist" id="clist"></div>
   </div>
 
@@ -229,7 +308,14 @@ const pct = v => (v * 100).toFixed(1) + '%';
 })();
 
 fetch('/api/auth/me').then(r => r.json())
-  .then(a => { $('who').textContent = a.signed_in ? a.display : 'Guest'; })
+  .then(a => {
+    $('who').textContent = a.signed_in ? a.display : 'Guest';
+    // Say it before the click. Previously both buttons looked available to a
+    // guest and answered with a 401 only after they had typed a group name.
+    // Shown to guests only. It sits above the two cards so the requirement
+    // arrives before the effort, not as a 401 after they have typed a name.
+    $('needauth').hidden = Boolean(a.signed_in && !a.anonymous);
+  })
   .catch(() => {});
 
 async function loadMine(){
@@ -252,7 +338,8 @@ async function loadMine(){
         ${c.role === 'member' ? `<button class="link" data-leave="${c.id}"
           style="color:var(--muted)">Leave</button>` : '<span></span>'}
       </div>`).join('')
-      : '<p class="cmeta">No cohorts yet. Create one, or join with a code.</p>';
+      : '<p class="cmeta">You are not in a group yet. Start one above, or join '
+        + 'with a code someone sent you.</p>';
 
     $('clist').querySelectorAll('[data-view]').forEach(b =>
       b.addEventListener('click', () => view(b.dataset.view)));
@@ -265,9 +352,19 @@ $('create').addEventListener('click', async () => {
   const name = $('cname').value.trim();
   if (!name) { $('cmsg').textContent = 'Give it a name first.'; return; }
   const fd = new FormData(); fd.append('name', name);
-  const res = await fetch('/api/cohort', {method:'POST', body:fd});
-  const d = await res.json();
-  if (!res.ok) { $('cmsg').textContent = d.detail; $('cmsg').className = 'msg err'; return; }
+  let res, d;
+  try {
+    res = await fetch('/api/cohort', {method:'POST', body:fd});
+    d = await res.json();
+  } catch (e) {
+    // A proxy or gateway error returns HTML, so res.json() throws rather than
+    // handing back an error object. Without this the promise rejects unhandled
+    // and the button sits pending with nothing shown.
+    $('cmsg').textContent = 'Could not reach the server. Try again in a moment.';
+    $('cmsg').className = 'msg err';
+    return;
+  }
+  if (!res.ok) { $('cmsg').textContent = d.detail || 'That did not work.'; $('cmsg').className = 'msg err'; return; }
   $('cmsg').className = 'msg';
   $('cmsg').innerHTML = `Created. Share this code:<br><span class="code">${esc(d.join_code)}</span>`;
   $('cname').value = '';
@@ -278,9 +375,16 @@ $('join').addEventListener('click', async () => {
   const code = $('code').value.trim();
   if (!code) { $('jmsg').textContent = 'Enter a code.'; return; }
   const fd = new FormData(); fd.append('code', code);
-  const res = await fetch('/api/cohort/join', {method:'POST', body:fd});
-  const d = await res.json();
-  if (!res.ok) { $('jmsg').textContent = d.detail; $('jmsg').className = 'msg err'; return; }
+  let res, d;
+  try {
+    res = await fetch('/api/cohort/join', {method:'POST', body:fd});
+    d = await res.json();
+  } catch (e) {
+    $('jmsg').textContent = 'Could not reach the server. Try again in a moment.';
+    $('jmsg').className = 'msg err';
+    return;
+  }
+  if (!res.ok) { $('jmsg').textContent = d.detail || 'That code did not work.'; $('jmsg').className = 'msg err'; return; }
   $('jmsg').className = 'msg';
   $('jmsg').textContent = d.already ? `Already in ${d.name}.` : `Joined ${d.name}.`;
   $('code').value = '';
@@ -288,15 +392,28 @@ $('join').addEventListener('click', async () => {
 });
 
 async function leave(id){
-  await fetch(`/api/cohort/${id}/leave`, {method:'POST'});
+  try {
+    await fetch(`/api/cohort/${id}/leave`, {method:'POST'});
+  } catch (e) {
+    $('jmsg').textContent = 'Could not reach the server — you are still a member.';
+    $('jmsg').className = 'msg err';
+    return;                 // do not clear the view on a failure that did not happen
+  }
   $('report').innerHTML = '';
   loadMine();
 }
 
 async function view(id){
-  const res = await fetch(`/api/cohort/${id}`);
-  const d = await res.json();
-  if (!res.ok) { $('report').innerHTML = `<div class="panel"><div class="blocked">${esc(d.detail)}</div></div>`; return; }
+  let res, d;
+  try {
+    res = await fetch(`/api/cohort/${id}`);
+    d = await res.json();
+  } catch (e) {
+    $('report').innerHTML = '<div class="panel"><div class="blocked">'
+      + 'Could not load this group. Check your connection and try again.</div></div>';
+    return;
+  }
+  if (!res.ok) { $('report').innerHTML = `<div class="panel"><div class="blocked">${esc(d.detail || 'Could not load this group.')}</div></div>`; return; }
 
   if (!d.available) {
     $('report').innerHTML = `<div class="panel">
@@ -343,8 +460,8 @@ async function view(id){
 
     ${d.skill_gaps.length ? `<div class="panel">
       <p class="eyebrow">Curriculum signal</p>
-      <h2 style="margin-bottom:6px">What their job ads keep asking for</h2>
-      <p class="sub" style="margin-bottom:16px">Counted across every advert this group
+      <h2 style="margin-bottom:6px">What their job descriptions keep asking for</h2>
+      <p class="sub" style="margin-bottom:16px">Counted across every job description this group
         applied to. These are counts, not predictions — but they're what the market
         is asking your people for.</p>
       ${d.skill_gaps.map(g => `
@@ -369,6 +486,7 @@ async function view(id){
 
 loadMine();
 </script>
-<script src="/backdrop.js"></script>
+<script src="/backdrop.js?v=3"></script>
+<script src="/authbox.js?v=3" defer></script>
 </body>
 </html>

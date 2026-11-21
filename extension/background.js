@@ -19,7 +19,11 @@
  * won't claim things it can't support.
  */
 
-const DEFAULT_ENDPOINT = "http://127.0.0.1:8000";
+// Production default. Development overrides it from the popup's
+// Advanced field. Shipping localhost as the default means a real
+// install silently queues captures against a server that is not
+// running on the user's machine.
+const DEFAULT_ENDPOINT = "https://rejectionintel.example";  // <-- set your domain
 const QUEUE_KEY = "ri_queue";
 const MAX_QUEUE = 200;
 
@@ -93,8 +97,12 @@ async function drain() {
       // current item — dropping the tail would silently lose captures the
       // user made before their token expired.
       keep.push(...queue.slice(i));
+      // Clear the dead credential so the popup offers Reconnect rather than
+      // showing a green light over a token that no longer works.
+      await chrome.storage.local.remove("ri_token");
       await chrome.storage.local.set({
-        ri_last_error: "Token rejected. Copy a fresh one from the app.",
+        ri_needs_reconnect: true,
+        ri_last_error: "Sign-in expired. Reconnect from the popup.",
       });
       break;
     } else if (res.status === 400) {
@@ -109,6 +117,50 @@ async function drain() {
   await writeQueue(keep);
   if (sent) await chrome.storage.local.remove("ri_last_error");
   return { sent, remaining: keep.length };
+}
+
+/* Open the app and let connect.js mint a token from inside the page. The
+ * pending flag survives the sign-in redirect, so "Connect -> sign in" is one
+ * motion rather than two clicks. */
+async function connect() {
+  const { endpoint } = await getConfig();
+  await chrome.storage.local.set({ ri_connect_pending: true });
+  await chrome.storage.local.remove("ri_connect_state");
+  const tab = await chrome.tabs.create({
+    url: `${endpoint}/app?ri_connect=1`,
+    active: true,
+  });
+  await chrome.storage.local.set({ ri_connect_tab: tab.id });
+  return { opened: true };
+}
+
+async function handshake(result) {
+  const r = result || {};
+
+  if (!r.ok || !r.token) {
+    // Leave the tab open: signed_out means the user has a step to take, and
+    // closing the tab would take away the thing they need.
+    await chrome.storage.local.set({ ri_connect_state: r.reason || "failed" });
+    return { ok: false };
+  }
+
+  await chrome.storage.local.set({
+    ri_token: r.token,
+    ri_account: r.account || "",
+  });
+  await chrome.storage.local.remove([
+    "ri_last_error", "ri_needs_reconnect", "ri_connect_pending",
+    "ri_connect_state",
+  ]);
+
+  const c = await chrome.storage.local.get("ri_connect_tab");
+  if (c.ri_connect_tab) {
+    try { await chrome.tabs.remove(c.ri_connect_tab); } catch (e) { /* closed */ }
+    await chrome.storage.local.remove("ri_connect_tab");
+  }
+
+  const drained = await drain();
+  return { ok: true, ...drained };
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
@@ -130,6 +182,95 @@ chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
 
   if (msg.type === "drain") {
     drain().then(respond);
+    return true;
+  }
+
+  if (msg.type === "connect") {
+    connect().then(respond);
+    return true;
+  }
+
+  if (msg.type === "handshake_result") {
+    handshake(msg.result).then(respond);
+    return true;
+  }
+
+  if (msg.type === "ghost") {
+    // The content script cannot fetch this itself: content scripts are subject
+    // to CORS and the API sends no CORS headers. Routing through the worker
+    // also means the token never enters the page.
+    (async () => {
+      const { token, endpoint } = await getConfig();
+      const body = new URLSearchParams({
+        jd_text: (msg.jd_text || "").slice(0, 20000),
+        company: msg.company || "",
+      });
+      const headers = { "Content-Type": "application/x-www-form-urlencoded" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      try {
+        const res = await fetch(`${endpoint}/api/ghost/check`,
+                                { method: "POST", headers, body });
+        if (!res.ok) { respond({ error: `http_${res.status}` }); return; }
+        respond({ report: await res.json(), connected: Boolean(token) });
+      } catch (e) {
+        respond({ error: "unreachable" });
+      }
+    })();
+    return true;
+  }
+
+  if (msg.type === "signals") {
+    (async () => {
+      const { token, endpoint } = await getConfig();
+      if (!token) { respond({ error: "not_connected" }); return; }
+      const qs = msg.company ? `?company=${encodeURIComponent(msg.company)}` : "";
+      try {
+        const res = await fetch(`${endpoint}/api/cohort/signals${qs}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) { respond({ error: `http_${res.status}` }); return; }
+        respond({ signals: await res.json() });
+      } catch (e) {
+        respond({ error: "unreachable" });
+      }
+    })();
+    return true;
+  }
+
+  if (msg.type === "analyze") {
+    // /api/analyze-jd is unauthenticated and form-encoded. The resume never
+    // leaves storage except on this call, and only to the user's own server.
+    (async () => {
+      const { endpoint } = await getConfig();
+      const store = await chrome.storage.local.get("ri_resume");
+      const resume = (store.ri_resume || "").trim();
+      if (resume.length < 80) { respond({ error: "no_resume" }); return; }
+
+      const body = new URLSearchParams({
+        jd_text: (msg.jd_text || "").slice(0, 20000),
+        resume_text: resume.slice(0, 40000),
+      });
+      try {
+        const res = await fetch(`${endpoint}/api/analyze-jd`, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { respond({ error: data.detail || `http_${res.status}` }); return; }
+        respond({ report: data });
+      } catch (e) {
+        respond({ error: "unreachable" });
+      }
+    })();
+    return true;
+  }
+
+  if (msg.type === "autofill_result") {
+    // Injected script reporting back. Parked for the popup to read, because
+    // the popup may already have closed by the time the fill finishes.
+    chrome.storage.local.set({ ri_autofill: { ...msg, at: Date.now() } });
+    respond({ ok: true });
     return true;
   }
 

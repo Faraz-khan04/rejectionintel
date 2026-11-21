@@ -18,27 +18,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F7FB;--card:#FFFFFF;
-  --paper:#F7F7FB;--panel:#FFFFFF;
-  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
-  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+  --bg:#F4F3F0;--card:#FCFBF9;
+  --paper:#F4F3F0;--panel:#FCFBF9;
+  --ink:#111112;--ink-2:#44454A;--muted:#6E7076;
+  --line:#E0DFDA;--line-2:#ECEBE7;--rule:#E0DFDA;--rule-soft:#ECEBE7;
 
-  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--accent-ink:#3A3A3F;--on-accent:#FCFBF9;
 
-  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
-  --t-insufficient:#78809A;
-  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
-  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+  --t-observed:#0E8A5F;--t-strong:#111112;--t-weak:#C4820E;--t-none:#7F7F86;
+  --t-insufficient:#7F7F86;
+  --bg-observed:#E3F5ED;--bg-strong:#E4E3DE;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E4E3DE;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
 
   --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
   --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
-  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-none:#66666D;--sem-none-bg:#EDEFF4;
   --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
 
   --display:'Plus Jakarta Sans',system-ui,sans-serif;
   --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
   --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
-  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+  --shadow:0 1px 2px rgba(17,17,18,.04), 0 12px 28px -12px rgba(17,17,18,.10);
 }
 *,*::before,*::after{box-sizing:border-box}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
@@ -54,11 +54,21 @@ h3{font-size:1rem;font-weight:600;letter-spacing:-.01em}
 .stat{font-family:var(--display);font-weight:800;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
 .ci{font-size:.75rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 
-.nav{position:sticky;top:0;z-index:50;background:rgba(237,239,242,.9);border-bottom:1px solid var(--rule)}
+.nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px) saturate(1.05);border-bottom:1px solid var(--rule)}
 .nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);margin:0 auto;padding:0 26px}
 /* The right-hand group owns the spacer. Previously margin-left:auto lived on
    the status badge, so hiding the badge collapsed the whole header left. */
 .nav-right{display:flex;align-items:center;gap:14px;margin-left:auto}
+/* Signed-in state is one glyph. Same height as the theme toggle beside it. */
+.who-avatar{width:34px;height:34px;border-radius:50%;padding:0;
+  border:1px solid var(--rule);background:none;color:var(--ink-2);
+  font-weight:600;font-size:13.5px;line-height:1;cursor:pointer;
+  display:grid;place-items:center;transition:color .15s,border-color .15s}
+.who-avatar:hover{color:var(--ink);border-color:var(--ink-2)}
+
+/* The links were wrapping to two lines — "Ghost check" and "Before you apply"
+   broke mid-label and doubled the header height. Nothing in a nav should wrap. */
+.nav-links a{white-space:nowrap}
 .brand{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:800;font-size:1.04rem;letter-spacing:-.03em;text-decoration:none}
 .brand-mark{width:28px;height:28px;border-radius:14px;flex:none;display:grid;
   place-items:center;background:linear-gradient(140deg,var(--accent),var(--accent-2));
@@ -68,7 +78,7 @@ h3{font-size:1rem;font-weight:600;letter-spacing:-.01em}
 .nav-mode.show{display:inline-block}
 
 .page{padding:44px 0 80px}
-.panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:28px;box-shadow:0 1px 2px rgba(14,16,23,.04),0 12px 30px -22px rgba(14,16,23,.2)}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:28px;box-shadow:0 1px 2px rgba(17,17,18,.04),0 12px 30px -22px rgba(17,17,18,.2)}
 .panel + .panel{margin-top:20px}
 
 /* ---------- upload ---------- */
@@ -83,7 +93,7 @@ input[type=file],textarea{
 textarea{min-height:132px;resize:vertical;font-family:var(--mono);font-size:.78rem;line-height:1.6}
 .drop{border:1.5px dashed var(--rule);border-radius:14px;padding:16px;background:var(--paper)}
 .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:22px;padding-top:20px;border-top:1px solid var(--rule-soft)}
-.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 22px -12px rgba(37,92,153,.8);border:0;font-family:var(--body);font-weight:600;font-size:.93rem;padding:12px 24px;border-radius:14px;cursor:pointer;transition:background .16s}
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:var(--on-accent);box-shadow:0 10px 22px -12px rgba(17,17,18,.8);border:0;font-family:var(--body);font-weight:600;font-size:.93rem;padding:12px 24px;border-radius:14px;cursor:pointer;transition:background .16s}
 .btn:hover:not(:disabled){transform:translateY(-1px)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn-link{background:none;border:1px solid var(--rule);color:var(--ink-2);text-decoration:none;font-size:.9rem;padding:11px 18px;border-radius:14px}
@@ -143,7 +153,10 @@ th{font-family:var(--mono);font-size:.65rem;letter-spacing:.09em;text-transform:
 td.num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
 tbody tr:hover{background:var(--paper)}
 .pill{font-family:var(--mono);font-size:.66rem;padding:2.5px 7px;border-radius:4px;background:var(--insufficient-bg);color:var(--t-insufficient)}
-.pill.ok{background:var(--observed-bg);color:var(--t-observed)}
+.pill-strong{background:var(--sem-strong-bg);color:var(--sem-strong)}   /* offer */
+.pill-neg{background:var(--sem-neg-bg);color:var(--sem-neg)}           /* rejected */
+.pill-maybe{background:var(--sem-maybe-bg);color:var(--sem-maybe)}     /* still open */
+.pill-none{background:var(--sem-none-bg);color:var(--sem-none)}        /* ghosted */
 .tbl-scroll{overflow-x:auto;max-height:430px;overflow-y:auto}
 .narr{background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--t-strong);border-radius:var(--r);padding:24px 26px;margin-bottom:20px}
 .narr h2{font-size:1.5rem;margin-bottom:12px}
@@ -164,40 +177,40 @@ tbody tr:hover{background:var(--paper)}
 
 /* ============================================================
    DARK MODE
-   Not an inversion. On dark, the indigo accent is lightened so it
+   Not an inversion. On dark, the accent is lightened so it
    keeps its contrast ratio against a near-black card, and the four
    tier colours are re-picked rather than reused — an amber that
    reads "caution" on white reads muddy on #14161F.
    ============================================================ */
 [data-theme="dark"]{
-  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
-  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
-  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+  --bg:#08080A;--card:#141416;--paper:#08080A;--panel:#141416;
+  --ink:#E8E8E4;--ink-2:#9A9AA1;--muted:#7E7E85;
+  --line:#26262A;--line-2:#1C1C1F;--rule:#26262A;--rule-soft:#1C1C1F;
 
-  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--accent-ink:#C7C7C9;--on-accent:#08080A;
 
-  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
-  --t-insufficient:#8891A6;
-  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
-  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+  --t-observed:#3FC495;--t-strong:#E8E8E4;--t-weak:#E0A93A;--t-none:#8C8C93;
+  --t-insufficient:#8C8C93;
+  --bg-observed:#10352A;--bg-strong:#232326;--bg-weak:#3A2E14;--bg-none:#1F1F23;
+  --observed-bg:#10352A;--strong-bg:#232326;--weak-bg:#3A2E14;--insufficient-bg:#1F1F23;
 
   --sem-strong:#3FC495;--sem-strong-bg:#10352A;
   --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
-  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-none:#8C8C93;--sem-none-bg:#1F1F23;
   --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
   color-scheme:dark;
 }
-[data-theme="dark"] .nav{background:rgba(10,11,17,.82);}
+
 [data-theme="dark"] .nav-cta{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#0A0B11}
-[data-theme="dark"] .track,[data-theme="dark"] .bar{background:#1F2431}
+[data-theme="dark"] .track,[data-theme="dark"] .bar{background:#1F1F23}
 [data-theme="dark"] .card-funnel{border-color:var(--line)}
 [data-theme="dark"] .mesh{opacity:.4}
 [data-theme="dark"] .math,[data-theme="dark"] .close-box{
-  background:linear-gradient(155deg,#15172A 0%,#1C1A38 55%,#221D46 100%);
+  background:linear-gradient(155deg,#131315 0%,#1C1C1F 55%,#212124 100%);
   border:1px solid var(--line);
 }
-[data-theme="dark"] .cmp thead th{background:#1A1D28}
-[data-theme="dark"] .cmp td:nth-child(2){background:rgba(139,123,255,.07)}
+[data-theme="dark"] .cmp thead th{background:#1A1A1D}
+[data-theme="dark"] .cmp td:nth-child(2){background:rgba(232,232,228,.05)}
 [data-theme="dark"] .cmp thead th:nth-child(2){background:var(--accent-soft)}
 [data-theme="dark"] .sec-alt .card,[data-theme="dark"] .sec-alt .step,[data-theme="dark"] .tier{background:#0F1118}
 [data-theme="dark"] .step code,[data-theme="dark"] .plan li::before{border-color:var(--accent)}
@@ -225,15 +238,12 @@ tbody tr:hover{background:var(--paper)}
 
 /* content above the backdrop */
 .page{position:relative;z-index:1}
-.nav{z-index:50}
 /* Panels stay high-alpha: this page is a table of numbers and the
    backdrop must never cost legibility. */
 .panel{background:color-mix(in srgb,var(--panel) 92%,transparent)}
 .finding{background:color-mix(in srgb,var(--panel) 92%,transparent)}
 .kpi{background:color-mix(in srgb,var(--panel) 90%,transparent)}
 .narr{background:var(--panel);}
-[data-theme="dark"] 
-[data-theme="dark"] 
 
 /* ---------- processing stepper ---------- */
 #stepperPanel{display:none;margin-top:20px}
@@ -304,8 +314,10 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 .mrow-sub{font-size:.78rem;color:var(--muted)}
 .mrow-fit{font-size:.86rem;font-variant-numeric:tabular-nums;color:var(--ink-2)}
 .mchip{font-size:.68rem;font-weight:600;padding:3px 9px;border-radius:14px;white-space:nowrap}
-.mchip-ok{background:var(--observed-bg);color:var(--t-observed)}
-.mchip-no{background:var(--insufficient-bg);color:var(--t-insufficient)}
+.mchip-strong{background:var(--sem-strong-bg);color:var(--sem-strong)}
+.mchip-neg{background:var(--sem-neg-bg);color:var(--sem-neg)}
+.mchip-maybe{background:var(--sem-maybe-bg);color:var(--sem-maybe)}
+.mchip-none{background:var(--sem-none-bg);color:var(--sem-none)}
 .modal-foot{padding:14px 24px;border-top:1px solid var(--rule-soft);font-size:.79rem;
   color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.modal-inner{animation:none}}
@@ -369,7 +381,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 #intakeBar .ib-txt b{color:var(--ink);font-weight:600}
 
 /* section jump bar */
-.jump{position:sticky;top:74px;z-index:40;display:flex;gap:6px;flex-wrap:wrap;
+.jump{position:sticky;top:72px;z-index:70;display:flex;gap:6px;flex-wrap:wrap;
   padding:9px;margin-bottom:20px;border-radius:14px;
   background:var(--panel);border:1px solid var(--rule)}
 .jump a{font-size:.82rem;font-weight:500;color:var(--muted);text-decoration:none;
@@ -442,7 +454,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 .tab{border:0;background:none;font:inherit;font-size:.88rem;font-weight:500;
   color:var(--muted);padding:8px 16px;border-radius:14px;cursor:pointer}
 .tab.on{background:var(--panel);color:var(--ink);
-  box-shadow:0 1px 3px rgba(14,16,23,.12)}
+  box-shadow:0 1px 3px rgba(17,17,18,.12)}
 .pane{display:none}
 .pane.on{display:block}
 #pasteBox{min-height:150px;font-family:ui-monospace,monospace;font-size:.78rem}
@@ -528,9 +540,10 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 /* ---------- the verdict: one sentence, one number ---------- */
 .verdict{position:relative;overflow:hidden;border-radius:14px;padding:34px 36px;
   margin-bottom:20px;border:1px solid var(--rule);
-  background:linear-gradient(150deg,#14162A 0%,#1D1B3E 55%,#241F4C 100%);color:#E7EAF4}
+  background-image:repeating-linear-gradient(102deg,rgba(232,232,228,.020) 0 1px,transparent 1px 4px),linear-gradient(150deg,#131315 0%,#1A1A1D 55%,#212124 100%);
+  color:#E8E8E4}
 .verdict::after{content:"";position:absolute;width:520px;height:520px;right:-12%;
-  top:-40%;background:radial-gradient(circle,rgba(59,126,191,.34),transparent 66%);
+  top:-40%;background:radial-gradient(circle,rgba(199,199,201,.20),transparent 66%);
   filter:blur(54px)}
 .verdict > *{position:relative;z-index:1}
 .v-flag{display:inline-flex;align-items:center;gap:7px;font-size:.68rem;font-weight:700;
@@ -539,16 +552,15 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 .v-critical{background:rgba(229,72,77,.18);color:#FF9CA0}
 .v-notable{background:rgba(224,169,58,.18);color:#F0C572}
 .v-healthy{background:rgba(63,196,149,.18);color:#6FE0B4}
-.v-unknown{background:rgba(255,255,255,.1);color:#B6BFCA}
+.v-unknown{background:rgba(255,255,255,.1);color:#BCBCB8}
 .v-grid{display:grid;grid-template-columns:auto 1fr;gap:34px;align-items:center}
 @media(max-width:680px){.v-grid{grid-template-columns:1fr;gap:18px}}
 .v-stat{font-family:var(--display);font-size:4.4rem;font-weight:800;letter-spacing:-.055em;
-  line-height:.9;background:linear-gradient(140deg,#7FC0F0,#38BDF8);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.v-stat-l{font-size:.8rem;color:#9AA3BE;margin-top:8px;max-width:14ch;line-height:1.4}
+  line-height:.9;color:var(--ink)}
+.v-stat-l{font-size:.8rem;color:#9E9E9A;margin-top:8px;max-width:14ch;line-height:1.4}
 .v-head{font-family:var(--display);font-size:1.75rem;font-weight:800;letter-spacing:-.03em;
   line-height:1.15;color:#fff}
-.v-detail{font-size:.97rem;color:#AEB6CE;margin:12px 0 0;line-height:1.62;max-width:56ch}
+.v-detail{font-size:.97rem;color:#B0B0AC;margin:12px 0 0;line-height:1.62;max-width:56ch}
 
 /* ---------- progress since last time ---------- */
 .prog{border-radius:14px;padding:22px 26px;margin-bottom:20px;border:1px solid var(--rule);
@@ -649,10 +661,10 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 .share-wrap{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start}
 @media(max-width:860px){.share-wrap{grid-template-columns:1fr}}
 .share-card{position:relative;overflow:hidden;border-radius:14px;padding:28px;
-  background:linear-gradient(150deg,#14162A 0%,#1D1B3E 55%,#241F4C 100%);color:#E7EAF4;
-  border:1px solid var(--rule)}
+  background-image:repeating-linear-gradient(102deg,rgba(232,232,228,.020) 0 1px,transparent 1px 4px),linear-gradient(150deg,#131315 0%,#1A1A1D 55%,#212124 100%);
+  color:#E8E8E4;border:1px solid var(--rule)}
 .share-card::after{content:"";position:absolute;width:420px;height:420px;right:-18%;
-  top:-46%;background:radial-gradient(circle,rgba(59,126,191,.34),transparent 66%);
+  top:-46%;background:radial-gradient(circle,rgba(199,199,201,.20),transparent 66%);
   filter:blur(48px)}
 .share-card > *{position:relative;z-index:1}
 .share-head{font-family:var(--display);font-size:1.28rem;font-weight:800;
@@ -661,8 +673,8 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 .share-s{border-top:1px solid rgba(255,255,255,.13);padding-top:11px}
 .share-v{font-family:var(--display);font-size:1.7rem;font-weight:800;letter-spacing:-.04em;
   color:#fff;line-height:1}
-.share-l{font-size:.74rem;color:#9AA3BE;margin-top:5px;line-height:1.35}
-.share-mark{margin-top:20px;font-size:.72rem;color:#7F87A6;letter-spacing:.06em}
+.share-l{font-size:.74rem;color:#9E9E9A;margin-top:5px;line-height:1.35}
+.share-mark{margin-top:20px;font-size:.72rem;color:#85858C;letter-spacing:.06em}
 .share-side p{font-size:.88rem;color:var(--ink-2);line-height:1.6;margin:0 0 14px}
 .share-quote{background:var(--paper);border:1px solid var(--rule);border-radius:14px;
   padding:14px 16px;font-size:.88rem;color:var(--ink-2);line-height:1.6}
@@ -680,7 +692,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
   background:var(--rule-soft)}
 .tabs-nav a{font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;
   padding:7px 15px;border-radius:14px}
-.tabs-nav a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(14,16,23,.12)}
+.tabs-nav a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(17,17,18,.12)}
 @media(max-width:720px){.tabs-nav{display:none}}
 
 /* ============================================================
@@ -714,7 +726,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 .tl-track{position:relative;height:26px;background:var(--rule-soft);border-radius:14px}
 .tl-bar{position:absolute;top:0;bottom:0;border-radius:14px;
   background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  display:flex;align-items:center;padding-left:10px;color:#fff;font-size:.74rem;
+  display:flex;align-items:center;padding-left:10px;color:var(--on-accent);font-size:.74rem;
   font-weight:600;white-space:nowrap;overflow:hidden}
 .tl-when{font-size:.78rem;color:var(--muted);text-align:right;white-space:nowrap}
 .tl-axis{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);
@@ -755,13 +767,13 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 :root{
   --sem-strong:#0E8A5F;  --sem-strong-bg:#E3F5ED;   /* held up / positive outcome */
   --sem-maybe:#C4820E;   --sem-maybe-bg:#FBF1DE;    /* tentative / needs attention */
-  --sem-none:#5F6780;    --sem-none-bg:#EDEFF4;     /* not enough data / neutral */
+  --sem-none:#66666D;    --sem-none-bg:#EDEFF4;     /* not enough data / neutral */
   --sem-neg:#C4433F;     --sem-neg-bg:#FBEAEA;      /* negative outcome */
 }
 [data-theme="dark"]{
   --sem-strong:#3FC495;  --sem-strong-bg:#10352A;
   --sem-maybe:#E0A93A;   --sem-maybe-bg:#3A2E14;
-  --sem-none:#8891A6;    --sem-none-bg:#1F2431;
+  --sem-none:#8C8C93;    --sem-none-bg:#1F1F23;
   --sem-neg:#F0776F;     --sem-neg-bg:#3A1D1D;
 }
 .sem{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:650;
@@ -853,7 +865,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
   border:1px solid color-mix(in srgb,var(--accent) 20%,var(--rule));
   border-radius:14px;padding:20px 22px;
   box-shadow:0 1px 0 0 rgba(255,255,255,.35) inset,
-             0 10px 30px -22px rgba(14,16,23,.5);
+             0 10px 30px -22px rgba(17,17,18,.5);
 
 /* A tinted wash in the corner, so each card has a light source rather than
    being a flat rectangle. */
@@ -871,8 +883,8 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
 
 </style>
 <script src="/d3.min.js" defer></script>
-<script src="/funnel.js" defer></script>
-<link rel="stylesheet" href="/backdrop.css">
+<script src="/funnel.js?v=3" defer></script>
+<link rel="stylesheet" href="/backdrop.css?v=3">
 </head>
 <body>
 
@@ -899,13 +911,14 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
     <div class="tabs-nav">
       <a href="/app" class="on">Analyse</a>
       <a href="/track">Tracker</a>
-      <a href="/ghost">Ghost check</a>
-      <a href="/cohort">Cohort</a>
+      <a href="/ghost">Ghost check</a><a href="/pre-apply">Before you apply</a>
+      <a href="/cohort">Groups</a>
       <a href="/employers">Employers</a>
     </div>
     <div class="nav-right">
+      <div id="ri-authbox"></div>
       <span class="nav-mode" id="mode" role="status"></span>
-      <span class="who" id="who"></span>
+      <span class="who" id="who" hidden></span>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch between light and dark theme">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
       <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -921,9 +934,9 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
       <p class="eyebrow">Step 1</p>
       <h1>Add your applications</h1>
       <p class="hint" style="font-size:.93rem;max-width:62ch;margin-top:12px">
-        Your applications are saved so you can add to them later and see how
-        things change. Nothing is shared with anyone, and you can work as a
-        guest without giving us an email.
+        Your applications are saved, so you can add more later and see what changed.
+        Nothing is shared with anyone. You can work as a guest without giving us
+        an email.
       </p>
 
       <div class="up-grid">
@@ -936,10 +949,10 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
           <div class="pane on" id="paneFile">
           <label for="csv">Your applications</label>
           <p class="hint">
-            We need four things per row: the company, the job title, the date
-            you applied, and what happened. Column names are matched loosely —
-            "Company Name" or "Employer" both work fine. Uploading the same
-            file twice won't create duplicates; only new rows get added.
+            Four things per row: company, job title, the date you applied, and what
+            happened. Column names do not have to match ours. "Company Name" and
+            "Employer" both work. Upload the same file twice and only the new
+            rows get added.
           </p>
           <div class="drop"><input type="file" id="csv" accept=".csv,text/csv"></div>
           </div>
@@ -947,9 +960,9 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
           <div class="pane" id="panePaste">
             <label for="pasteBox">Paste your rows</label>
             <p class="hint">
-              Copy cells straight out of Google Sheets, Excel or Notion and paste
-              here — tabs, commas and semicolons all work. Or add them one at a
-              time below. Keep a header row if you have one.
+              Copy cells out of Google Sheets, Excel or Notion and paste them here.
+              Tabs, commas and semicolons all work. Or add rows one at a time
+              below. Keep your header row if you have one.
             </p>
             <textarea id="pasteBox" placeholder="Company&#9;Role&#9;Date Applied&#9;Status&#10;Acme Cloud&#9;Senior PM&#9;2026-03-14&#9;rejected"></textarea>
 
@@ -983,11 +996,11 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
         <div class="field">
           <label for="resumeFile">Resume</label>
           <p class="hint">
-            Upload a PDF or Word file — or several, if you've been sending
-            different versions. Name them the same way as the
-            <code>resume_version</code> column in your spreadsheet and we can
-            compare how each one performed. We read the year ranges to work out
-            your experience, counting overlapping roles once rather than twice.
+            Upload a PDF or Word file. Send several if you have been using
+            different versions of your resume. Name each one the same way as the
+            <code>resume_version</code> column in your spreadsheet, and we will show you which
+            performed better. We work out your years of experience from the
+            dates, counting overlapping roles once.
           </p>
           <div class="drop" style="margin-bottom:8px">
             <input type="file" id="resumeFile" multiple
@@ -1016,8 +1029,8 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
         <button class="btn-link" id="signin" type="button"
                 style="cursor:pointer;font-family:var(--body)">Send sign-in link</button>
         <p class="authnote" id="authnote">
-          Optional. Working as a guest is fine — signing in just means your history
-          survives a cleared cookie or a different device.
+          Optional. Guest works fine. Signing in means your history survives a
+          cleared cookie or a different device.
         </p>
       </div>
     </section>
@@ -1032,17 +1045,18 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
     </section>
 
     <section class="panel" id="matchPanel">
-      <p class="eyebrow">No history yet?</p>
+      <p class="eyebrow">Before you apply</p>
       <h2 style="margin-bottom:6px">Check one job against your resume</h2>
       <p class="hint" style="margin-bottom:18px">
-        Paste a job ad and we'll score it the same way we score every application
-        in a full report. Useful before you apply, not just after.
+        Paste a job description. It gets the same score as every application above.
+        This is the <a href="/pre-apply">Before you apply</a> page, kept here so
+        you do not lose your place.
       </p>
       <div class="match-grid">
         <div>
           <textarea id="jdBox" placeholder="Paste the job description here…"></textarea>
           <button class="btn" id="matchBtn" type="button"
-                  style="margin-top:12px;width:auto">Score this job</button>
+                  style="margin-top:12px;width:auto">Check it</button>
           <span class="status" id="matchStatus" style="margin-left:12px"></span>
         </div>
         <div id="matchResult"></div>
@@ -1051,7 +1065,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
     </section>
 
     <section class="panel" id="resumeOnly">
-      <p class="eyebrow">Resume readout</p>
+      <p class="eyebrow">Your resume, as we read it</p>
       <h2 style="margin-bottom:18px">What your resume says about you</h2>
       <div class="ro-top" id="roTop"></div>
       <div id="roSkills"></div>
@@ -1074,7 +1088,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
       <a href="#s-actions">What to change</a>
       <a href="#s-data">All applications</a>
       <span class="lang">
-        <span class="lang-l">Easy language</span>
+        <span class="lang-l" title="Rewrites every sentence on this page in shorter, simpler words. No number changes.">Simpler wording</span>
         <button class="sw" id="easyToggle" aria-pressed="false"
                 aria-label="Switch to easy language"></button>
       </span>
@@ -1151,8 +1165,10 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
       </div>
 
       <section class="panel" id="stagesPanel" style="display:none">
-        <p class="eyebrow">Two questions</p>
-        <h2 style="margin-bottom:18px">Two separate questions</h2>
+        <p class="eyebrow">Before and after a reply</p>
+        <h2 style="margin-bottom:6px">Two different problems, split apart</h2>
+        <p class="hint" style="margin-bottom:18px">No reply and a reply that goes nowhere are different problems. They have
+          different fixes. Averaging them hides both.</p>
         <div class="stages" id="stages"></div>
       </section>
 
@@ -1165,21 +1181,25 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
       </section>
 
       <section class="panel" id="factsPanel" style="display:none">
-        <p class="eyebrow">Worth knowing</p>
-        <h2 style="margin-bottom:18px">Things you probably hadn't noticed</h2>
+        <p class="eyebrow">Odds and ends</p>
+        <h2 style="margin-bottom:6px">Small facts from your own rows</h2>
+        <p class="hint" style="margin-bottom:18px">Timing, repeats, and where your applications cluster. Counted straight
+          from your rows. None of it is a finding, just what is in there.</p>
         <div class="facts" id="facts"></div>
       </section>
 
       <section class="panel" id="linesPanel" style="display:none">
         <p class="eyebrow">Your resume, line by line</p>
-        <h2 style="margin-bottom:6px">Lines worth rewriting</h2>
+        <h2 style="margin-bottom:6px">Individual lines worth rewriting</h2>
         <p class="hint" id="linesNote" style="margin-bottom:18px"></p>
         <div id="lines"></div>
       </section>
 
       <section class="panel" id="sharePanel" style="display:none">
         <p class="eyebrow">Share</p>
-        <h2 style="margin-bottom:18px">The bit worth sending to a friend</h2>
+        <h2 style="margin-bottom:6px">A summary you can paste to someone helping you</h2>
+        <p class="hint" style="margin-bottom:18px">Counts and rates only. No company names, no job titles, no quotes.
+          Written for a mentor or a careers adviser who asks how it is going.</p>
         <div class="share-wrap">
           <div class="share-card" id="shareCard"></div>
           <div class="share-side">
@@ -1213,8 +1233,8 @@ dialog.modal::backdrop{background:rgba(6,7,12,.72)}
         <div class="tbl-scroll">
           <table>
             <thead><tr>
-              <th>Company</th><th>Role</th><th style="text-align:right">Match</th>
-              <th>Got as far as</th><th>What happened</th><th>What you were missing</th>
+              <th>Company</th><th>Role</th><th style="text-align:right" title="How well your resume matched what this job asked for, out of 100">Resume match</th>
+              <th>Furthest stage</th><th>Final outcome</th><th>What you were missing</th>
             </tr></thead>
             <tbody id="apps"></tbody>
           </table>
@@ -1240,8 +1260,15 @@ const pct = x => (x*100).toFixed(1) + '%';
 /* ---- auth ---- */
 function refreshWho(){
   fetch('/api/auth/me').then(r => r.json()).then(a => {
+    // An initial, not the address. The full address lives in the button's
+    // title and aria-label — it does not need to sit in the header of every
+    // screenshot, screen-share and recording the person ever makes.
+    const initial = (a.display || '?').trim().charAt(0).toUpperCase();
     $('who').innerHTML = a.signed_in
-      ? `<b>${esc(a.display)}</b> <button class="link-btn" id="signout">Sign out</button>`
+      ? `<button class="who-avatar" id="signout" type="button"
+                 title="${esc(a.display)} — sign out"
+                 aria-label="Signed in as ${esc(a.display)}. Sign out.">${
+            esc(initial)}</button>`
       : `<span>Guest</span>`;
     $('authbox').style.display = a.signed_in ? 'none' : 'flex';
     const so = $('signout');
@@ -1251,6 +1278,12 @@ function refreshWho(){
   }).catch(() => {});
 }
 refreshWho();
+
+/* The header sign-in box re-renders in place here rather than reloading, so a
+   chosen CSV survives signing in. This keeps the page's own auth-dependent
+   pieces in step with it. */
+window.RI_NO_RELOAD_ON_AUTH = true;
+document.addEventListener('ri-auth-changed', refreshWho);
 
 (function(){
   const params = new URLSearchParams(location.search);
@@ -1975,7 +2008,7 @@ function finishRender(d, s){
     $('roadmapPanel').style.display = 'block';
     $('rmNote').textContent =
       'Ranked by how many of your own applications asked for it. The weeks are '
-      + 'typical ranges for reaching the level a job ad means — not a promise about you.';
+      + 'typical ranges for reaching the level a job description means — not a promise about you.';
     const max = Math.max(...rm.gaps.map(g => g.required_by));
     // Time-to-learn keyed by skill, so the bar and the estimate stay on one row
     // instead of living in a second panel repeating the same ranking.
@@ -2028,7 +2061,7 @@ function finishRender(d, s){
       <td>${esc(a.title)}</td>
       <td class="num"><span class="pip pip-${fitBand(a.fit).band}"></span>${a.fit}</td>
       <td>${esc(a.stage)}</td>
-      <td><span class="pill ${a.responded?'ok':''}">${esc(a.resolution)}</span></td>
+      <td><span class="pill pill-${outcomeTone(a)}">${esc(a.resolution.replace(/_/g,' '))}</span></td>
       <td style="color:var(--muted);font-size:.8rem">${a.missing.length ? esc(a.missing.join(', ')) : '—'}</td>
     </tr>`).join('');
 
@@ -2086,7 +2119,7 @@ function drillList(rows, title, subtitle){
            <div class="mrow-sub">${esc(a.title)}${a.missing && a.missing.length
              ? ' · missing ' + esc(a.missing.slice(0,3).join(', ')) : ''}</div></div>
       <span class="mrow-fit">fit ${a.fit}</span>
-      <span class="mchip ${a.responded ? 'mchip-ok' : 'mchip-no'}">${esc(a.responded ? a.stage : a.resolution)}</span>
+      <span class="mchip mchip-${outcomeTone(a)}">${esc((a.responded ? a.stage : a.resolution).replace(/_/g,' '))}</span>
     </div>`).join('')
     : '<div class="mrow"><div class="mrow-sub">No applications in this group.</div></div>';
   const responded = sorted.filter(a => a.responded).length;
@@ -2424,7 +2457,7 @@ function celebrate(row){
 
   const box = row.querySelector('.act-box');
   if (!box) return;
-  const colours = ['#255C99', '#3B7EBF', '#3FC495', '#E0A93A'];
+  const colours = ['#9E9E9A', '#C7C7C9', '#3FC495', '#E0A93A'];
   for (let i = 0; i < 8; i++) {
     const s = document.createElement('span');
     s.className = 'spark';
@@ -2443,15 +2476,19 @@ function celebrate(row){
 function outcomeTone(a){
   const stage = (a.stage || '').toLowerCase();
   const res = (a.resolution || '').toLowerCase();
-  if (stage === 'offer') return 'strong';
-  if (stage === 'final' || stage === 'interview') return 'maybe';
+  // Outcome only. The stage column already says how far it got, and colouring
+  // this pill by "did they reply" made a rejection green whenever the
+  // rejection arrived by email.
+  if (res === 'offer' || stage === 'offer') return 'strong';
   if (res === 'rejected') return 'neg';
-  return 'none';               // ghosted, open, withdrawn
+  if (res === 'ghosted' || res === 'no_response') return 'none';
+  if (res === 'open' || res === 'in_progress' || res === 'pending') return 'maybe';
+  return 'none';               // withdrawn, unknown
 }
 
 /* ---------- employers who never replied ----------
    The one ghost-job signal that comes from outcomes rather than from reading a
-   job ad, which is why it can be stated as a count instead of a suspicion. */
+   job description, which is why it can be stated as a count instead of a suspicion. */
 function renderGhost(d){
   const g = d.ghost;
   if (!g) { $('ghostPanel').style.display = 'none'; return; }
@@ -2594,6 +2631,7 @@ function esc(s){
     <div class="modal-foot"><span id="dFoot"></span><span>Esc to close</span></div>
   </div>
 </dialog>
-<script src="/backdrop.js"></script>
+<script src="/backdrop.js?v=3"></script>
+<script src="/authbox.js?v=3" defer></script>
 </body>
 </html>

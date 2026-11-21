@@ -1,0 +1,14 @@
+Senior Backend Engineer
+
+We are looking for a Senior Backend Engineer to join our platform team.
+
+Requirements:
+- 5+ years of experience with Java and Spring Boot
+- Strong grasp of Kubernetes, Docker and Kafka
+- Experience with PostgreSQL and writing performant SQL
+- Familiarity with Terraform and observability tooling (Datadog, OTEL)
+- Hands-on with gRPC and event-driven architecture
+
+Nice to have:
+- Exposure to Temporal or Cadence
+- Knowledge of ClickHouse

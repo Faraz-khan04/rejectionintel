@@ -218,7 +218,8 @@ def _summary_fallback(payload: dict) -> SummaryResult:
     weak = payload["findings_by_tier"].get("weak", 0)
 
     if strong:
-        head = f"{strong} pattern(s) held up across {n} applications"
+        head = (f"{strong} pattern held up across {n} applications" if strong == 1
+                else f"{strong} patterns held up across {n} applications")
     elif weak:
         head = f"No firm patterns across {n} applications, {weak} worth watching"
     else:

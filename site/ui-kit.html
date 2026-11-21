@@ -13,18 +13,18 @@
    see all four working against mock data.
    ============================================================ */
 :root{
-  --bg:#F7F7FB;--card:#FFFFFF;--ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
-  --line:#E6E8F0;--line-2:#EEF0F6;
-  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#EEEBFE;--accent-ink:#4536C4;
-  --ok:#0E8A5F;--warn:#C4820E;--none:#78809A;
+  --bg:#F4F3F0;--card:#FCFBF9;--ink:#111112;--ink-2:#44454A;--muted:#6E7076;
+  --line:#E0DFDA;--line-2:#ECEBE7;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--on-accent:#FCFBF9;--accent-ink:#3A3A3F;
+  --ok:#0E8A5F;--warn:#C4820E;--none:#7F7F86;
   --display:'Plus Jakarta Sans',system-ui,sans-serif;
   --body:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
 }
 [data-theme="dark"]{
-  --bg:#0A0B11;--card:#14161F;--ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
-  --line:#252938;--line-2:#1C1F2B;
-  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#231F45;--accent-ink:#B9ADFF;
-  --ok:#3FC495;--warn:#E0A93A;--none:#8891A6;
+  --bg:#08080A;--card:#141416;--ink:#E8E8E4;--ink-2:#9A9AA1;--muted:#7E7E85;
+  --line:#26262A;--line-2:#1C1C1F;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--on-accent:#08080A;--accent-ink:#C7C7C9;
+  --ok:#3FC495;--warn:#E0A93A;--none:#8C8C93;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -49,7 +49,7 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin
   border:1px solid color-mix(in srgb,var(--line) 70%,transparent);
   border-radius:20px;
   box-shadow:0 1px 0 0 rgba(255,255,255,.55) inset,
-             0 10px 34px -18px rgba(14,16,23,.45);
+             0 10px 34px -18px rgba(17,17,18,.45);
   padding:26px;
 }
 [data-theme="dark"] .glass{box-shadow:0 1px 0 0 rgba(255,255,255,.07) inset,0 14px 40px -20px rgba(0,0,0,.75)}
@@ -57,8 +57,8 @@ h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin
 /* soft radial wash behind everything */
 .aura{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
 .aura span{position:absolute;border-radius:50%;filter:blur(80px)}
-.a1{width:44vw;height:40vw;right:8%;top:-8%;background:radial-gradient(circle,rgba(139,92,246,.42),transparent 68%)}
-.a2{width:38vw;height:34vw;left:2%;top:38%;background:radial-gradient(circle,rgba(90,71,224,.34),transparent 68%)}
+.a1{width:44vw;height:40vw;right:8%;top:-8%;background:radial-gradient(circle,rgba(232,232,228,.28),transparent 68%)}
+.a2{width:38vw;height:34vw;left:2%;top:38%;background:radial-gradient(circle,rgba(199,199,201,.22),transparent 68%)}
 
 /* ============================================================
    2. PROGRESS STEPPER — terminal styling
@@ -154,7 +154,7 @@ dialog.modal::backdrop{background:rgba(6,7,12,.62);backdrop-filter:blur(5px)}
 .sticky-tag{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:4px 10px;border-radius:999px;flex:none}
 .sticky-text{flex:1;min-width:220px;font-size:.9rem;color:var(--ink-2)}
 .sticky-text b{color:var(--ink);font-weight:600}
-.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;font-family:var(--body);font-weight:600;font-size:.9rem;padding:11px 20px;border-radius:11px;cursor:pointer;white-space:nowrap}
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:var(--on-accent);border:0;font-family:var(--body);font-weight:600;font-size:.9rem;padding:11px 20px;border-radius:11px;cursor:pointer;white-space:nowrap}
 .btn-quiet{background:none;border:1px solid var(--line);color:var(--ink-2)}
 </style>
 </head>

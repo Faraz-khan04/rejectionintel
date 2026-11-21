@@ -37,7 +37,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -73,11 +73,55 @@ def _make_engine():
             cur.close()
 
         return eng
-    return create_engine(url, pool_pre_ping=True, future=True)
+    # Bounded on purpose. SQLAlchemy's default is 5 + 10 overflow PER PROCESS;
+    # four web workers and two RQ workers therefore demand up to 90 connections
+    # from a database that typically allows 100, and the failure presents as
+    # random timeouts rather than "out of connections".
+    #
+    # pool_recycle matters just as much: managed Postgres and PgBouncer both
+    # close idle connections, and without recycling we hand out a socket the
+    # server already dropped.
+    return create_engine(
+        url,
+        pool_pre_ping=True,
+        pool_size=int(os.environ.get("DB_POOL_SIZE", "5")),
+        max_overflow=int(os.environ.get("DB_MAX_OVERFLOW", "5")),
+        pool_recycle=int(os.environ.get("DB_POOL_RECYCLE", "1800")),
+        pool_timeout=int(os.environ.get("DB_POOL_TIMEOUT", "30")),
+        future=True,
+        connect_args={
+            "connect_timeout": int(os.environ.get("DB_CONNECT_TIMEOUT", "10")),
+            "application_name": "rejectionintel",
+        },
+    )
 
 
 ENGINE = _make_engine()
 SessionLocal = sessionmaker(bind=ENGINE, expire_on_commit=False, future=True)
+
+
+def dispose_pool() -> None:
+    """Drop connections inherited from a parent process.
+
+    THE FAILURE THIS PREVENTS DOES NOT RAISE
+    ----------------------------------------
+    RQ forks a child per job and gunicorn forks its workers. A fork copies the
+    file descriptor of every pooled socket, so parent and child both believe
+    they own that connection and both write to it. Postgres then returns one
+    session's result set to the other — another account's rows, delivered
+    without an error anywhere.
+
+    close=False is deliberate: the child must abandon the sockets, not close
+    them, because closing would tear down the connections the parent is still
+    using.
+    """
+    ENGINE.dispose(close=False)
+
+
+# POSIX only. Registered here rather than in each worker's hook so that no
+# future fork site can forget it.
+if hasattr(os, "register_at_fork"):
+    os.register_at_fork(after_in_child=dispose_pool)
 
 
 def _add_missing_columns() -> list[str]:
@@ -140,6 +184,27 @@ def init_db() -> list[str]:
     rather than an error. Losing a creation race means someone else did the
     work, which is the outcome we wanted.
     """
+    # On Postgres, take a lock the whole cluster can see. The file lock below
+    # only serialises processes that share a filesystem — the moment the web
+    # app and the workers run in separate containers it protects nothing, which
+    # is precisely the deployment it was written for.
+    if not database_url().startswith("sqlite"):
+        from sqlalchemy import text as _text
+        with ENGINE.begin() as conn:
+            conn.execute(_text("SELECT pg_advisory_lock(198472013)"))
+            try:
+                try:
+                    Base.metadata.create_all(ENGINE)
+                except (OperationalError, ProgrammingError, IntegrityError) as exc:
+                    if "already exists" not in str(exc).lower():
+                        raise
+                added = _add_missing_columns()
+            finally:
+                conn.execute(_text("SELECT pg_advisory_unlock(198472013)"))
+        if added:
+            print(f"  schema updated: added {', '.join(added)}")
+        return sorted(Base.metadata.tables)
+
     lock_path = Path(tempfile.gettempdir()) / "rejectionintel-initdb.lock"
     lock = open(lock_path, "w")
     try:
@@ -152,8 +217,13 @@ def init_db() -> list[str]:
 
         try:
             Base.metadata.create_all(ENGINE)
-        except OperationalError as exc:
+        except (OperationalError, ProgrammingError, IntegrityError) as exc:
             # Another process won the race. Anything else is a real failure.
+            #
+            # SQLite raises OperationalError; Postgres raises ProgrammingError
+            # (DuplicateTable), and a concurrent index build raises
+            # IntegrityError. Catching only the SQLite shape means this guard
+            # silently stops working on the database it exists for.
             if "already exists" not in str(exc).lower():
                 raise
         added = _add_missing_columns()

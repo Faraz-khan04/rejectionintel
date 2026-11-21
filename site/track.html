@@ -18,43 +18,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F7FB;--card:#FFFFFF;
-  --paper:#F7F7FB;--panel:#FFFFFF;
-  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
-  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+  --bg:#F4F3F0;--card:#FCFBF9;
+  --paper:#F4F3F0;--panel:#FCFBF9;
+  --ink:#111112;--ink-2:#44454A;--muted:#6E7076;
+  --line:#E0DFDA;--line-2:#ECEBE7;--rule:#E0DFDA;--rule-soft:#ECEBE7;
 
-  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--accent-ink:#3A3A3F;--on-accent:#FCFBF9;
 
-  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
-  --t-insufficient:#78809A;
-  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
-  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+  --t-observed:#0E8A5F;--t-strong:#111112;--t-weak:#C4820E;--t-none:#7F7F86;
+  --t-insufficient:#7F7F86;
+  --bg-observed:#E3F5ED;--bg-strong:#E4E3DE;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E4E3DE;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
 
   --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
   --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
-  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-none:#66666D;--sem-none-bg:#EDEFF4;
   --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
 
   --display:'Plus Jakarta Sans',system-ui,sans-serif;
   --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
   --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
-  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+  --shadow:0 1px 2px rgba(17,17,18,.04), 0 12px 28px -12px rgba(17,17,18,.10);
 }
 [data-theme="dark"]{
-  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
-  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
-  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+  --bg:#08080A;--card:#141416;--paper:#08080A;--panel:#141416;
+  --ink:#E8E8E4;--ink-2:#9A9AA1;--muted:#7E7E85;
+  --line:#26262A;--line-2:#1C1C1F;--rule:#26262A;--rule-soft:#1C1C1F;
 
-  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--accent-ink:#C7C7C9;--on-accent:#08080A;
 
-  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
-  --t-insufficient:#8891A6;
-  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
-  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+  --t-observed:#3FC495;--t-strong:#E8E8E4;--t-weak:#E0A93A;--t-none:#8C8C93;
+  --t-insufficient:#8C8C93;
+  --bg-observed:#10352A;--bg-strong:#232326;--bg-weak:#3A2E14;--bg-none:#1F1F23;
+  --observed-bg:#10352A;--strong-bg:#232326;--weak-bg:#3A2E14;--insufficient-bg:#1F1F23;
 
   --sem-strong:#3FC495;--sem-strong-bg:#10352A;
   --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
-  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-none:#8C8C93;--sem-none-bg:#1F1F23;
   --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
   color-scheme:dark;
 }
@@ -66,7 +66,7 @@ a{color:inherit}
 h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;line-height:1.1}
 
 /* nav shared with the rest of the product */
-.nav{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule)}
+.nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px) saturate(1.05);border-bottom:1px solid var(--rule)}
 .nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);
   margin:0 auto;padding:0 26px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;
@@ -77,7 +77,7 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;
   background:var(--rule-soft)}
 .tabs a{font-size:.88rem;font-weight:500;color:var(--muted);text-decoration:none;
   padding:7px 15px;border-radius:14px}
-.tabs a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(14,16,23,.12)}
+.tabs a.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(17,17,18,.12)}
 .nav-right{display:flex;align-items:center;gap:14px;margin-left:auto;font-size:.85rem;color:var(--muted)}
 .theme-btn{width:36px;height:36px;border-radius:14px;border:1px solid var(--rule);
   background:var(--panel);color:var(--ink-2);cursor:pointer;display:grid;place-items:center;padding:0}
@@ -100,7 +100,7 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;
 @media(max-width:900px){.addbar{grid-template-columns:1fr 1fr}}
 .addbar input{padding:10px 12px;border-radius:14px;border:1px solid var(--rule);
   background:var(--paper);color:var(--ink);font-family:var(--body);font-size:.9rem;min-width:0}
-.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:var(--on-accent);border:0;
   font-family:var(--body);font-weight:600;font-size:.9rem;padding:10px 20px;border-radius:14px;
   cursor:pointer;white-space:nowrap}
 .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -132,6 +132,10 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;
 .card-r{font-size:.8rem;color:var(--muted);margin-top:2px;line-height:1.4}
 .card-m{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:.72rem;color:var(--muted)}
 .card-age{padding:2px 7px;border-radius:14px;background:var(--none-bg);color:var(--none)}
+.follow{margin-top:8px;width:100%;padding:6px;border-radius:8px;
+  border:1px solid var(--rule);background:none;color:var(--ink-2);
+  font:500 12px var(--body);cursor:pointer}
+.follow:hover{border-color:var(--muted);color:var(--ink)}
 .card-age.old{background:var(--warn-bg);color:var(--warn)}
 .card-x{position:absolute;top:8px;right:8px;border:0;background:none;color:var(--muted);
   cursor:pointer;font-size:.9rem;line-height:1;padding:2px 4px;border-radius:5px;opacity:0}
@@ -143,8 +147,22 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;
   font-family:var(--body)}
 @media(max-width:820px){.move{display:block}.card{cursor:default}}
 
+
+/* Back to top. Hidden until the reader scrolls up past two viewports. */
+.to-top{position:fixed;right:22px;bottom:22px;z-index:90;
+  width:42px;height:42px;border-radius:14px;
+  border:1px solid var(--line,var(--rule));
+  background:color-mix(in srgb,var(--card,var(--panel)) 90%,transparent);
+  backdrop-filter:blur(10px);color:var(--ink-2);cursor:pointer;
+  display:grid;place-items:center;
+  opacity:0;transform:translateY(8px);pointer-events:none;
+  transition:opacity .18s,transform .18s,color .15s,border-color .15s}
+.to-top.on{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{color:var(--ink);border-color:var(--muted)}
+.to-top svg{width:17px;height:17px}
+@media (prefers-reduced-motion:reduce){.to-top{transition:opacity .01s}}
 </style>
-<link rel="stylesheet" href="/backdrop.css">
+<link rel="stylesheet" href="/backdrop.css?v=3">
 </head>
 <body>
 
@@ -172,12 +190,13 @@ h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;margin:0;
     <div class="tabs">
       <a href="/app">Analyse</a>
       <a href="/track" class="on">Tracker</a>
-      <a href="/ghost">Ghost check</a>
-      <a href="/cohort">Cohort</a>
+      <a href="/ghost">Ghost check</a><a href="/pre-apply">Before you apply</a>
+      <a href="/cohort">Groups</a>
       <a href="/employers">Employers</a>
     </div>
     <div class="nav-right">
-      <span id="who">Guest</span>
+      <div id="ri-authbox"></div>
+      <span id="who" hidden>Guest</span>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>
@@ -265,6 +284,27 @@ function render(){
   wire();
 }
 
+/* A fixed template with two blanks filled from this person's own record.
+   No claim about how long employers usually take, no "most companies reply
+   within" — we do not know that, and an opening line that invents it is worse
+   than one that simply asks. The recipient is left blank: guessing
+   careers@company.com produces bounces the sender only learns about later. */
+function followUpLink(c){
+  const role = c.role || 'the role';
+  const company = c.company || 'your company';
+  const applied = c.applied_at ? `on ${c.applied_at}` : `${c.days_since} days ago`;
+  const subject = `Following up on my ${role} application`;
+  const body = [
+    'Hello,', '',
+    `I applied for the ${role} position at ${company} ${applied} and wanted to `
+      + 'check whether the role is still open and where things stand.', '',
+    "I'm still very interested, and happy to send anything else that would help.",
+    '', 'Thank you for your time.',
+  ].join('\n');
+  return `mailto:?subject=${encodeURIComponent(subject)}`
+       + `&body=${encodeURIComponent(body)}`;
+}
+
 function card(c, columns){
   const old = c.column === 'applied' && c.days_since >= 21;
   return `
@@ -277,6 +317,7 @@ function card(c, columns){
         ${c.resume_label && c.resume_label !== 'default'
           ? `<span>${esc(c.resume_label)}</span>` : ''}
       </div>
+      ${old ? `<button class="follow" data-follow="${c.id}">Follow up</button>` : ''}
       <select class="move" data-move="${c.id}">
         ${columns.map(col => `<option value="${col.key}"${
           col.key === c.column ? ' selected' : ''}>${esc(col.title)}</option>`).join('')}
@@ -288,6 +329,14 @@ function card(c, columns){
    on touch is a reliable way to make a board unusable. */
 function wire(){
   let dragged = null;
+
+  document.querySelectorAll('[data-follow]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = Number(el.dataset.follow);
+      const c = Object.values(BOARD.cards).flat().find(x => x.id === id);
+      if (c) window.location.href = followUpLink(c);
+    });
+  });
 
   document.querySelectorAll('.card').forEach(el => {
     el.addEventListener('dragstart', e => {
@@ -361,6 +410,8 @@ $('add').addEventListener('click', async () => {
 
 load();
 </script>
-<script src="/backdrop.js"></script>
+<script src="/backdrop.js?v=3"></script>
+<script src="/authbox.js?v=3" defer></script>
+<script src="/totop.js?v=3" defer></script>
 </body>
 </html>

@@ -33,7 +33,7 @@ class JobRequirements:
     required_skills: list[str] = field(default_factory=list)
     preferred_skills: list[str] = field(default_factory=list)
     min_years: int | None = None
-    seniority: Seniority = Seniority.MID
+    seniority: Seniority | None = None   # None = the posting never said
     industry: str | None = None
 
 
@@ -42,7 +42,7 @@ class CandidateProfile:
     skills: dict[str, int] = field(default_factory=dict)   # canonical -> mentions
     skills_in_bullets: set[str] = field(default_factory=set)
     total_experience_months: int = 0
-    seniority: Seniority = Seniority.MID
+    seniority: Seniority | None = None   # None = the posting never said
     industries: set[str] = field(default_factory=set)
 
 
@@ -117,7 +117,15 @@ def _experience_fit(months: int, min_years: int | None) -> tuple[float, dict]:
     }
 
 
-def _seniority_fit(cand: Seniority, job: Seniority) -> tuple[float, dict]:
+def _seniority_fit(cand: Seniority, job: Seniority | None) -> tuple[float, dict]:
+    # A job description that never states a level is not evidence of a level.
+    # Scoring against an assumed "mid" penalised a staff-level candidate two
+    # bands for a fact nobody asserted — the same failure the whole product
+    # exists to avoid, sitting inside our own scorer. Neutral, like industry
+    # and experience already do when the posting is silent.
+    if job is None:
+        return 75.0, {"note": "job seniority not stated"}
+
     delta = cand.rank - job.rank
     if delta == 0:
         score = 100.0

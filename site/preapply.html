@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Before you apply — RejectionIntel</title>
+<meta name="description" content="Check one job description against your resume before you send it. Every number is computed, not guessed.">
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('ri-theme');
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/backdrop.css?v=3">
+<style>
+:root{
+  --bg:#F4F3F0;--card:#FCFBF9;--panel:#FCFBF9;--ink:#111112;--ink-2:#44454A;
+  --muted:#6E7076;--line:#E0DFDA;--rule:#E0DFDA;--rule-soft:#ECEBE7;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--accent-ink:#3A3A3F;--on-accent:#FCFBF9;
+  --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
+  --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
+  --sem-none:#66666D;--sem-none-bg:#EDEFF4;
+  --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
+  --wrap:1080px;
+}
+[data-theme="dark"]{
+  --bg:#08080A;--card:#141416;--panel:#141416;--ink:#E8E8E4;--ink-2:#9A9AA1;
+  --muted:#7E7E85;--line:#26262A;--rule:#26262A;--rule-soft:#1C1C1F;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--accent-ink:#C7C7C9;--on-accent:#08080A;
+  --sem-strong:#3FC495;--sem-strong-bg:#10352A;
+  --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
+  --sem-none:#8C8C93;--sem-none-bg:#1F1F23;
+  --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+
+.nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px) saturate(1.05);border-bottom:1px solid var(--line)}
+.nav-in{max-width:var(--wrap);margin:0 auto;padding:14px 22px;display:flex;
+  align-items:center;gap:18px}
+.brand{font:700 17px var(--display);color:var(--ink);text-decoration:none;
+  letter-spacing:-.02em;margin-right:auto}
+.nav a.t{font-size:14px;color:var(--muted);text-decoration:none}
+.nav a.t:hover,.nav a.t.on{color:var(--ink)}
+.nav-right{display:flex;align-items:center;gap:12px}
+
+main{max-width:var(--wrap);margin:0 auto;padding:40px 22px 64px}
+h1{font:700 30px/1.2 var(--display);margin:0 0 8px;letter-spacing:-.02em}
+.lede{color:var(--ink-2);font-size:15px;margin:0 0 28px;max-width:62ch}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 6px}
+textarea{width:100%;min-height:230px;padding:12px 14px;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);
+  font:13.5px/1.6 var(--body);resize:vertical}
+textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+input[type=file]{font-size:13px;color:var(--ink-2);margin-top:9px}
+
+.go{margin-top:20px;padding:12px 26px;border:0;border-radius:11px;
+  background:var(--accent);color:var(--on-accent);font:600 15px var(--body);cursor:pointer}
+.go:hover{background:var(--accent-2)}
+.go[disabled]{opacity:.6;cursor:default}
+.msg{font-size:13.5px;color:var(--muted);margin:14px 0 0}
+.msg.bad{color:var(--sem-neg)}
+
+.out{margin-top:34px;border-top:1px solid var(--rule);padding-top:26px}
+.out[hidden]{display:none}
+.score{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.pct{font:700 44px/1 var(--display);letter-spacing:-.03em}
+.band{font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px}
+.band.strong{background:var(--sem-strong-bg);color:var(--sem-strong)}
+.band.fair{background:var(--sem-maybe-bg);color:var(--sem-maybe)}
+.band.weak,.band.stretch{background:var(--sem-neg-bg);color:var(--sem-neg)}
+.verdict{font-size:16px;margin:12px 0 0;max-width:70ch}
+.years{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+
+h2{font:600 12px var(--body);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin:30px 0 12px}
+ul.gaps{list-style:none;margin:0;padding:0}
+ul.gaps li{padding:12px 0;border-top:1px solid var(--rule-soft);
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+ul.gaps li:first-child{border-top:0}
+.sk{font-weight:600}
+.need{font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  margin-left:8px;color:var(--sem-maybe)}
+.need.pref{color:var(--muted)}
+.mile{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.wks{flex:none;font-size:13px;color:var(--ink-2)}
+.matched{font-size:14px;color:var(--ink-2)}
+.note{font-size:13px;color:var(--muted);line-height:1.6;margin:20px 0 0;
+  padding:12px 14px;background:var(--sem-none-bg);border-radius:10px}
+
+/* ---- two-column diagnostic ----
+   Left: the job description you pasted, with the skills that fired highlighted
+   in place. Right: what came back. Side by side because the whole point is to
+   see the word and the verdict about it at the same time.
+   --bg-app / --bg-card are aliases of the existing values, not a new palette. */
+:root{--bg-app:var(--bg);--bg-card:var(--card);--border-light:var(--rule)}
+
+.diag{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;
+  align-items:start;margin-top:26px}
+@media(max-width:1000px){.diag{grid-template-columns:1fr}}
+.col-h{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.7rem;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+
+.jdview{background:var(--bg-app);border:1px solid var(--border-light);
+  border-radius:12px;padding:18px;max-height:620px;overflow:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;
+  line-height:1.75;white-space:pre-wrap;word-break:break-word;color:var(--ink-2)}
+mark.req{background:color-mix(in srgb,var(--t-observed) 22%,transparent);
+  color:var(--ink);border-radius:3px;padding:0 2px}
+mark.gap{background:color-mix(in srgb,var(--t-weak) 22%,transparent);
+  color:var(--ink);border-radius:3px;padding:0 2px}
+.legend{display:flex;gap:16px;margin-top:10px;font-size:.72rem;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;
+  margin-right:6px;vertical-align:middle}
+
+.score-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.pct{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums;font-size:2.8rem;font-weight:600;
+  letter-spacing:-.03em;line-height:1}
+.sk,.need,.wks{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.chip{display:inline-block;font-family:ui-monospace,monospace;font-size:.72rem;
+  padding:3px 9px;border-radius:6px;background:var(--bg-app);
+  border:1px solid var(--border-light);color:var(--ink-2);margin:0 6px 6px 0}
+
+/* ---- action plan ---- */
+.plan-item{border-top:1px solid var(--border-light);padding:14px 0}
+.plan-item:first-child{border-top:0}
+.plan-k{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.plan-orig{font-size:.85rem;color:var(--muted);margin:0 0 8px;
+  text-decoration:line-through;text-decoration-color:var(--border-light)}
+.plan-new{font-size:.92rem;line-height:1.6;margin:0}
+.plan-new b{background:color-mix(in srgb,var(--t-weak) 18%,transparent);
+  font-weight:600;border-radius:3px;padding:0 3px}
+.plan-why{font-size:.78rem;color:var(--muted);margin:6px 0 0}
+.plan-note{font-size:.78rem;color:var(--muted);line-height:1.6;
+  border-top:1px solid var(--border-light);margin-top:14px;padding-top:12px}
+
+/* ---- grouped skill chips ----
+   The wall of forty identical chips was the single least readable thing on
+   this page. Headings turn a list into a shape: "38 security, 6 certs" is a
+   sentence about a person; forty chips in a row is not. */
+.grp{margin-top:16px}
+.grp-h{display:flex;align-items:baseline;gap:8px;margin:0 0 8px}
+.grp-n{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted)}
+.grp-c{font-family:ui-monospace,monospace;font-size:.68rem;color:var(--muted);
+  opacity:.7}
+.grp-chips{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ---- gaps ----
+   Every gap repeated "4-8 weeks · enough to talk about it credibly in an
+   interview". Said once above the list, it is context; said seven times it is
+   noise that buries the skill names. */
+.gap-note{font-size:.82rem;color:var(--muted);line-height:1.6;margin:0 0 14px}
+.gap-row{display:flex;justify-content:space-between;align-items:baseline;
+  gap:14px;padding:11px 0;border-top:1px solid var(--border-light)}
+.gap-row:first-of-type{border-top:0}
+.gap-name{font-family:ui-monospace,monospace;font-size:.92rem;color:var(--ink)}
+.gap-need{font-family:ui-monospace,monospace;font-size:.66rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--t-weak);margin-left:8px}
+.gap-need.pref{color:var(--muted)}
+.gap-wks{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--muted);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* The plan's rationale, once. */
+.plan-lede{font-size:.85rem;color:var(--muted);line-height:1.6;margin:0 0 4px}
+
+/* ---- the left column follows you ----
+   The job description is the thing every number on the right refers to. It
+   used to scroll away and leave half the screen empty while you read the
+   action plan, so the evidence and the verdict were never on screen together.
+   Sticky below the nav; released on narrow screens where the columns stack. */
+.diag > div:first-child{position:sticky;top:74px;align-self:start}
+@media(max-width:1000px){.diag > div:first-child{position:static}}
+
+/* ---- summary strip ----
+   Four numbers, one line, above the prose. The verdict sentence is still
+   there — this is for the reader who wants the shape before the words. */
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;
+  background:var(--border-light);border:1px solid var(--border-light);
+  border-radius:12px;overflow:hidden;margin:18px 0 22px}
+.strip div{background:var(--bg-card);padding:12px 14px}
+.strip b{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums;font-size:1.32rem;font-weight:600;
+  letter-spacing:-.02em;line-height:1.1}
+.strip span{display:block;font-size:.7rem;color:var(--muted);margin-top:5px;
+  letter-spacing:.04em}
+.strip .under b{color:var(--t-weak)}
+@media(max-width:560px){.strip{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="stage" aria-hidden="true">
+  <span class="par" data-rate="-0.10"><span class="au au1"></span></span>
+  <span class="par" data-rate="-0.05"><span class="au au2"></span></span>
+  <span class="par" data-rate="-0.15"><span class="au au3"></span></span>
+  <span class="par" data-rate="-0.07"><span class="au au4"></span></span>
+  <span class="par" data-rate="-0.09"><span class="orb-breathe"><span class="orb"></span><span class="orb-ring"></span></span></span>
+</div>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/">RejectionIntel</a>
+    <a class="t" href="/app">Analyse</a>
+    <a class="t" href="/track">Tracker</a>
+    <a class="t" href="/ghost">Ghost check</a>
+    <a class="t on" href="/pre-apply">Before you apply</a>
+    <a class="t" href="/cohort">Groups</a>
+    <a class="t" href="/employers">Employers</a>
+    <div class="nav-right"><div id="ri-authbox"></div></div>
+  </div>
+</nav>
+
+<main>
+  <h1>Before you apply</h1>
+  <p class="lede">One job description against one resume. The AI reads the posting and lists
+    what it asks for. Nothing more. Every number below is then worked out by the
+    same scorer used in your full report. None of it predicts whether you will
+    get the job.</p>
+
+  <div class="grid">
+    <div>
+      <label for="jd">The job description</label>
+      <textarea id="jd" placeholder="Paste the whole job description — we need the requirements, not just the title."></textarea>
+    </div>
+    <div>
+      <label for="resume">Your resume</label>
+      <textarea id="resume" placeholder="Paste your resume text…"></textarea>
+      <input type="file" id="file" accept=".pdf,.doc,.docx,.txt">
+    </div>
+  </div>
+
+  <button class="go" id="go">Check it</button>
+  <p class="msg" id="msg"></p>
+
+  <section class="out" id="out" hidden>
+    <div class="diag">
+      <div>
+        <p class="col-h">The job description, as we read it</p>
+        <div class="jdview" id="jdview"></div>
+        <div class="legend">
+          <span><i style="background:color-mix(in srgb,var(--t-observed) 60%,transparent)"></i>on your resume</span>
+          <span><i style="background:color-mix(in srgb,var(--t-weak) 60%,transparent)"></i>not on your resume</span>
+        </div>
+      </div>
+      <div id="diagRight">
+    <div class="score">
+      <span class="pct" id="pct"></span>
+      <span class="band" id="band"></span>
+    </div>
+    <p class="verdict" id="verdict"></p>
+    <p class="years" id="years"></p>
+
+    <div class="strip" id="strip"></div>
+
+    <div id="gapWrap" hidden>
+      <h2>What the job description asks for that isn't on your resume</h2>
+      <ul class="gaps" id="gaps"></ul>
+    </div>
+
+    <div id="matchWrap" hidden>
+      <h2>Already covered</h2>
+      <p class="matched" id="matched"></p>
+    </div>
+
+        <div id="planWrap" hidden>
+          <h2>Action plan</h2>
+          <p class="plan-lede" id="planLede"></p>
+          <div id="plan"></div>
+          <p class="plan-note" id="planNote"></p>
+        </div>
+
+        <p class="note" id="note" hidden></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="/backdrop.js?v=3" defer></script>
+<script src="/authbox.js?v=3" defer></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g,
+  (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function setMsg(t, bad){ $('msg').textContent = t || ''; $('msg').className = 'msg' + (bad ? ' bad' : ''); }
+
+$('go').addEventListener('click', async () => {
+  const jd = $('jd').value.trim();
+  const resumeText = $('resume').value.trim();
+  const file = $('file').files[0];
+
+  if (jd.length < 40) { setMsg('Paste the full job description first.', true); return; }
+  if (!file && resumeText.length < 80) {
+    setMsg('Add your resume — paste the text or upload a file.', true); return;
+  }
+
+  $('go').disabled = true; setMsg('Reading the job description…');
+
+  const body = new FormData();
+  body.append('jd_text', jd);
+  if (file) body.append('resume', file);
+  else body.append('resume_text', resumeText);
+
+  try {
+    const res = await fetch('/api/analyze-jd', { method: 'POST', body });
+    const d = await res.json();
+    if (!res.ok) { setMsg(d.detail || 'Something went wrong.', true); $('go').disabled = false; return; }
+    render(d);
+    setMsg('');
+  } catch (e) {
+    setMsg('Could not reach the server.', true);
+  }
+  $('go').disabled = false;
+});
+
+/* Renders the endpoint's own JSON. No number is computed here — the same
+   compute_fit() behind the full report produced these, and a second opinion
+   from this page could only ever disagree with it. */
+/* Highlight the skills that fired, in the job description you pasted.
+ *
+ * Escape first, wrap second. A job description containing "<script>" must come
+ * out as visible text; doing it the other way round either shows our own tags
+ * or executes the page's input.
+ *
+ * Green = the requirement is on your resume. Amber = it is not. Both are drawn
+ * from the same lists the score is computed from, so a highlight can never
+ * disagree with the number beside it.
+ */
+function highlightJD(source, matched, missing){
+  let html = esc(source);
+  const paint = (terms, cls) => {
+    terms.forEach(term => {
+      const needle = esc(term).trim();
+      if (needle.length < 2) return;
+      const rx = new RegExp('(?<![\\w-])' + needle.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')
+                            + '(?![\\w-])', 'gi');
+      html = html.replace(rx, m => `<mark class="${cls}">${m}</mark>`);
+    });
+  };
+  paint(missing, 'gap');      // amber first: a gap outranks a match visually
+  paint(matched, 'req');
+  return html;
+}
+
+/* The action plan. Every line here already exists on the resume — resume_diff
+ * rewrites what is there and never drafts a bullet for a skill the person may
+ * not have. The brackets are blanks only the reader can fill; verify_suggestion
+ * rejects any digit that was not in the original line. */
+function renderPlan(rd){
+  const lines = (rd && rd.lines) || [];
+  if (!lines.length) { $('planWrap').hidden = true; return; }
+  $('plan').innerHTML = lines.map(l => `
+    <div class="plan-item">
+      <p class="plan-k">Line ${l.line_no} · ${l.problems.map(esc).join(' · ')}</p>
+      <p class="plan-orig">${esc(l.original)}</p>
+      <p class="plan-new">${esc(l.suggestion).replace(/\[([^\]]+)\]/g,
+        (m, inner) => `<b>[${inner}]</b>`)}</p>
+
+    </div>`).join('');
+  // "This says what you did, but not what changed because of it" was printed
+  // under all five items. Once, above them.
+  const whys = lines.map(l => l.why).filter(Boolean);
+  $('planNote').textContent = rd.note || '';
+  const lede = document.getElementById('planLede');
+  if (lede) lede.textContent = whys.length ? whys[0] : '';
+  $('planWrap').hidden = false;
+}
+
+/* Strip the markdown a pasted posting carries. Showing "**Location:**" tells
+ * the reader we could not be bothered to read our own input. */
+function plainJD(src){
+  return src
+    .replace(/^#{1,6}\s*/gm, '')          // headings
+    .replace(/\*\*(.+?)\*\*/g, '$1')      // bold
+    .replace(/^\s*[-*]\s+/gm, '• ')       // list markers
+    .replace(/`([^`]+)`/g, '$1');
+}
+
+/* Chips under headings, biggest group first. */
+function groupChips(names, groups){
+  const by = {};
+  names.forEach(n => { const g = groups[n] || 'Other'; (by[g] = by[g] || []).push(n); });
+  return Object.entries(by)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([g, list]) => `
+      <div class="grp">
+        <div class="grp-h">
+          <span class="grp-n">${esc(g)}</span>
+          <span class="grp-c">${list.length}</span>
+        </div>
+        <div class="grp-chips">${list.sort().map(s =>
+          `<span class="chip">${esc(s)}</span>`).join('')}</div>
+      </div>`).join('');
+}
+
+function render(d){
+  // Four numbers before the prose. Years is marked when it falls short of the
+  // posting, because that is the one figure a reader checks against themselves
+  // rather than against us.
+  const yrs = d.years_on_resume, need = d.years_required;
+  const short = (need != null && yrs != null && yrs < need);
+  $('strip').innerHTML = `
+    <div><b>${d.overall_match_percentage}%</b><span>match</span></div>
+    <div class="${short ? 'under' : ''}"><b>${yrs == null ? '—' : yrs}</b>
+      <span>years${need != null ? ` · asks ${need}` : ''}</span></div>
+    <div><b>${(d.matched_skills || []).length}</b><span>already covered</span></div>
+    <div><b>${(d.missing_skills || []).length}</b><span>gaps</span></div>`;
+
+  $('pct').textContent = d.overall_match_percentage + '%';
+  $('band').textContent = d.band || '';
+  $('band').className = 'band ' + (d.band || '');
+  $('verdict').textContent = d.verdict || '';
+
+  $('years').textContent = (d.years_required != null && d.years_on_resume != null)
+    ? `The job description asks for ${d.years_required} years. Your resume shows ${d.years_on_resume}.`
+    : '';
+
+  const gaps = d.missing_skills || [];
+  // The milestone text is identical on every row, so it is stated once.
+  const sharedMilestone = gaps.length && gaps.every(g => g.milestone === gaps[0].milestone)
+    ? gaps[0].milestone : '';
+  $('gaps').innerHTML =
+    (sharedMilestone
+      ? `<p class="gap-note">Weeks shown are to reach: ${esc(sharedMilestone)}.</p>`
+      : '') +
+    gaps.map(m => `
+      <div class="gap-row">
+        <span><span class="gap-name">${esc(m.skill_name)}</span><span class="gap-need${
+          m.necessity === 'required' ? '' : ' pref'}">${esc(m.necessity)}</span>${
+          (!sharedMilestone && m.milestone)
+            ? `<span class="gap-need pref"> ${esc(m.milestone)}</span>` : ''}</span>
+        <span class="gap-wks">${esc(m.weeks_range || '')}</span>
+      </div>`).join('');
+  $('gapWrap').hidden = gaps.length === 0;
+
+  const matched = d.matched_skills || [];
+  $('matched').innerHTML = groupChips(matched, d.skill_groups || {});
+  $('matchWrap').hidden = matched.length === 0;
+
+  // Surfaced, not hidden: when the vocabulary did the parsing rather than the
+  // model, the reader should know the job description may contain things we cannot see.
+  $('note').textContent = d.note || '';
+  $('note').hidden = !d.note;
+
+  // left column: your pasted text with the requirements marked in place
+  const missNames = (d.missing_skills || []).map(m => m.skill_name);
+  $('jdview').innerHTML = highlightJD(plainJD($('jd').value), matched, missNames);
+
+  renderPlan(d.resume_diff);
+
+  $('out').hidden = false;
+  $('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

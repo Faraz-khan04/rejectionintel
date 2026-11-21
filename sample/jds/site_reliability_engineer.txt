@@ -1,0 +1,15 @@
+Site Reliability Engineer
+
+You will keep a high traffic platform online.
+
+Must have:
+- Deep Linux and bash scripting experience
+- Production Kubernetes operation, not just familiarity
+- Terraform for infrastructure as code
+- Monitoring and observability with Prometheus and Grafana
+- On-call experience with incident response
+
+Bonus:
+- Experience with Istio or Linkerd
+- Chaos engineering practice
+- Familiarity with eBPF

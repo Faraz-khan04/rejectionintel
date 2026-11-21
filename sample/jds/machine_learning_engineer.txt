@@ -1,0 +1,13 @@
+Machine Learning Engineer
+
+Requirements:
+- Strong Python, including pandas and numpy
+- Experience with PyTorch or TensorFlow in production
+- Comfortable with SQL for feature extraction
+- Experience deploying models on AWS
+- Understanding of statistics and experiment design
+
+A plus:
+- MLflow or Weights and Biases
+- Experience with vector databases such as Pinecone or Weaviate
+- Feature store experience (Feast, Tecton)

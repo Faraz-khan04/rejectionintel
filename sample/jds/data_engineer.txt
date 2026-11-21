@@ -1,0 +1,15 @@
+Data Engineer
+
+Our data platform team owns the warehouse that every other team reports from.
+
+What you'll need:
+- 4+ years building data pipelines in Python
+- Strong SQL, ideally against Snowflake or BigQuery
+- Experience with dbt and Airflow in production
+- Familiarity with Spark for batch workloads
+- Comfortable with Git workflow and CI/CD
+
+Preferred:
+- Exposure to Iceberg or Delta Lake
+- Experience with Fivetran or Airbyte
+- Data contracts or schema registry work

@@ -1,0 +1,14 @@
+Product Designer
+
+We are looking for a Product Designer to join a small team.
+
+Requirements:
+* Strong portfolio of shipped product work
+* Expertise in Figma, including component libraries
+* Experience with user research and usability testing
+* Working knowledge of design systems
+* Ability to prototype interactions
+
+Nice to have:
+* Familiarity with Framer or ProtoPie
+* Motion design experience

@@ -310,11 +310,15 @@ def main() -> int:
     print("ROUTE TESTS — the HTTP surface")
     print("=" * 62)
 
-    c = TestClient(app)
-    test_auth(c)
-    test_guards(c)
-    test_stream(c)
-    test_access(c)
+    # Context-managed on purpose. Without `with`, TestClient spins up a fresh
+    # portal per request and tears it down again, so a background job that
+    # suspends on a worker thread never gets resumed between polls — it reads
+    # as a hung analysis that works perfectly against a real server.
+    with TestClient(app) as c:
+        test_auth(c)
+        test_guards(c)
+        test_stream(c)
+        test_access(c)
     test_concurrency()
     test_inputs(c)
 

@@ -37,6 +37,7 @@ returned skill must be traceable to a literal span of the input, and
 from __future__ import annotations
 
 import asyncio
+import logging
 import re
 from typing import Literal
 
@@ -44,7 +45,9 @@ from pydantic import BaseModel, Field, field_validator
 
 PRE_APPLY_VERSION = "0.1.0"
 
-TIMEOUT_SECONDS = 20
+TIMEOUT_SECONDS = 8   # was 20: the reader waits the whole timeout before the
+                      # deterministic path (70ms) even starts, so a slow model
+                      # cost 20 seconds and then produced the weaker answer.
 
 
 # ==========================================================================
@@ -90,7 +93,7 @@ class MissingSkill(BaseModel):
     estimated_weeks_to_learn: int = Field(..., ge=0, le=52)
     weeks_range: str = Field(..., description="e.g. '4-8 weeks'")
     milestone: str = Field(..., description="What 'learned' means for this skill")
-    evidence: str = Field(..., description="Where the advert asked for it")
+    evidence: str = Field(..., description="Where the job description asked for it")
 
 
 class PreApplyAnalysis(BaseModel):
@@ -121,7 +124,7 @@ class PreApplyAnalysis(BaseModel):
 # The prompt
 # ==========================================================================
 
-EXTRACTION_PROMPT = """You are a technical recruiter reading one job advert.
+EXTRACTION_PROMPT = """You are a technical recruiter reading one job description.
 
 Your only task is to list what this advert actually asks for. You are not
 scoring anyone, not giving advice, and not comparing anything to a resume.
@@ -217,6 +220,7 @@ async def extract_requirements(jd_text: str, provider) -> tuple[JDExtraction, st
     """
     from .deterministic import default_vocab
 
+    fallback_reason: str = ""
     if provider is not None:
         try:
             raw = await asyncio.wait_for(
@@ -228,10 +232,17 @@ async def extract_requirements(jd_text: str, provider) -> tuple[JDExtraction, st
             extraction, dropped = verify_extraction(extraction, jd_text)
             if extraction.requirements:
                 return extraction, "llm", dropped
+            fallback_reason = ("the model returned no requirements it could "
+                               "point at in the text")
         except asyncio.TimeoutError:
-            pass
-        except Exception:  # noqa: BLE001
-            pass
+            fallback_reason = (f"the model did not answer within "
+                               f"{TIMEOUT_SECONDS} seconds")
+        except Exception as exc:  # noqa: BLE001
+            fallback_reason = f"{type(exc).__name__}: {exc}"[:180]
+
+        if fallback_reason:
+            logging.getLogger("rejectionintel").warning(
+                "pre_apply fell back to the vocabulary: %s", fallback_reason)
 
     # Vocabulary path. Weaker — it only finds skills it already knows — but
     # it never invents one, so the guarantee is the same.
@@ -265,7 +276,9 @@ async def extract_requirements(jd_text: str, provider) -> tuple[JDExtraction, st
     m = re.search(r"(\d+)\s*\+?\s*years?", jd_text, re.I)
     if m:
         years = min(40, int(m.group(1)))
-    return JDExtraction(requirements=reqs, years_required=years), "vocabulary", []
+    return (JDExtraction(requirements=reqs, years_required=years),
+            f"vocabulary:{fallback_reason}" if fallback_reason else "vocabulary",
+            [])
 
 
 def analyse(resume_text: str, jd_text: str, extraction: JDExtraction,
@@ -297,9 +310,9 @@ def analyse(resume_text: str, jd_text: str, extraction: JDExtraction,
     # disagree with the report for the same advert.
     try:
         seniority = (Seniority(extraction.seniority)
-                     if extraction.seniority != "unknown" else Seniority.MID)
+                     if extraction.seniority != "unknown" else None)
     except ValueError:
-        seniority = Seniority.MID
+        seniority = None
 
     reqs = JobRequirements(
         required_skills=required,
@@ -358,10 +371,10 @@ def analyse(resume_text: str, jd_text: str, extraction: JDExtraction,
             f"whether this role is worth it before you spend an hour tailoring."
         )
 
-    note = ("Requirements were read from the advert by the model and each one "
+    note = ("Requirements were read from the job description by the model and each one "
             "checked against its own text." if method == "llm" else
             "Requirements were matched with the built-in vocabulary, which only "
-            "recognises skills it already knows. Some of this advert may not "
+            "recognises skills it already knows. Some of this job description may not "
             "have been read.")
 
     return PreApplyAnalysis(

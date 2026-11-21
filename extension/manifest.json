@@ -1,19 +1,30 @@
 {
   "manifest_version": 3,
   "name": "RejectionIntel Capture",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Save job applications to RejectionIntel as you apply, so you never have to maintain a spreadsheet.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
   "host_permissions": [
+    "https://rejectionintel.example/*",
     "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*",
     "https://boards.greenhouse.io/*",
     "https://job-boards.greenhouse.io/*",
     "https://jobs.lever.co/*",
     "https://jobs.ashbyhq.com/*",
     "https://www.linkedin.com/jobs/*"
   ],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_popup": "popup.html", "default_title": "RejectionIntel" },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "RejectionIntel"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -23,7 +34,20 @@
         "https://jobs.ashbyhq.com/*",
         "https://www.linkedin.com/jobs/*"
       ],
-      "js": ["content.js"],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://rejectionintel.example/*",
+        "http://127.0.0.1:8000/*",
+        "http://localhost:8000/*"
+      ],
+      "js": [
+        "connect.js"
+      ],
       "run_at": "document_idle"
     }
   ]

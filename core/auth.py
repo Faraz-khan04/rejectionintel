@@ -39,10 +39,11 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 
 from .db import session_scope
-from .models import User
+from .models import UsedMagicToken, User
 
 SESSION_COOKIE = "ri_session"
 SESSION_TTL = 60 * 60 * 24 * 30          # 30 days
@@ -61,6 +62,19 @@ def _load_secret() -> bytes:
     env = os.environ.get("SECRET_KEY")
     if env:
         return env.encode()
+
+    # The generated-file fallback is a development convenience and is actively
+    # unsafe with more than one replica: each invents its own key, so a session
+    # or API token minted by one is rejected by the next. The symptom is
+    # "people get logged out at random" with nothing in the logs, and a
+    # redeploy that loses the file logs everyone out at once.
+    if os.environ.get("ENV", "dev").strip().lower() == "production":
+        raise RuntimeError(
+            "SECRET_KEY must be set when ENV=production. Without it each "
+            "process generates a different signing key and sessions stop "
+            "working across replicas."
+        )
+
     if KEY_FILE.exists():
         return KEY_FILE.read_bytes().strip()
     key = secrets.token_urlsafe(48).encode()
@@ -176,8 +190,33 @@ def identity_for(user_id: int) -> Identity | None:
 # Session cookie
 # --------------------------------------------------------------------------
 
+def _session_nonce(user_id: int, rotate: bool = False) -> str | None:
+    """Read (or rotate) the per-user session nonce.
+
+    Same shape as the API token nonce and for the same reason: revocation has
+    to be per-user. Rotating the global SECRET_KEY would sign out every user
+    on the service, which is an outage, not a logout.
+    """
+    with session_scope() as s:
+        user = s.get(User, user_id)
+        if user is None:
+            return None
+        if rotate or not user.session_nonce:
+            user.session_nonce = secrets.token_hex(8)
+        return user.session_nonce
+
+
 def make_session(identity: Identity) -> str:
-    return sign({"uid": identity.user_id, "anon": identity.is_anonymous}, SESSION_TTL)
+    return sign({
+        "uid": identity.user_id,
+        "anon": identity.is_anonymous,
+        "n": _session_nonce(identity.user_id) or "",
+    }, SESSION_TTL)
+
+
+def revoke_sessions(user_id: int) -> None:
+    """Sign out every browser holding a cookie for this user."""
+    _session_nonce(user_id, rotate=True)
 
 
 def read_session(cookie: str | None) -> Identity | None:
@@ -191,7 +230,18 @@ def read_session(cookie: str | None) -> Identity | None:
     payload = verify(cookie)
     if not payload:
         return None
-    return identity_for(int(payload.get("uid", 0)))
+
+    uid = int(payload.get("uid", 0))
+    with session_scope() as s:
+        user = s.get(User, uid)
+        if user is None:
+            return None
+        # A cookie minted before the last "sign out everywhere" carries a stale
+        # nonce. Signatures alone cannot express revocation.
+        if user.session_nonce and not hmac.compare_digest(
+                str(payload.get("n", "")), user.session_nonce):
+            return None
+        return Identity(user.id, user.email, user.email.endswith("@guest.local"))
 
 
 def cookie_kwargs(secure: bool | None = None) -> dict:
@@ -202,7 +252,14 @@ def cookie_kwargs(secure: bool | None = None) -> dict:
     error anywhere. Set COOKIE_SECURE=1 behind HTTPS.
     """
     if secure is None:
-        secure = os.environ.get("COOKIE_SECURE", "").strip() in {"1", "true", "yes"}
+        raw = os.environ.get("COOKIE_SECURE", "").strip().lower()
+        if raw:
+            secure = raw in {"1", "true", "yes"}
+        else:
+            # Follow the environment rather than defaulting to the insecure
+            # option. One forgotten variable should not quietly downgrade every
+            # session cookie to plaintext on a live domain.
+            secure = os.environ.get("ENV", "dev").strip().lower() == "production"
     return {
         "httponly": True,          # unreadable from JS, so XSS can't lift it
         "samesite": "lax",         # survives the magic-link click, blocks CSRF POSTs
@@ -216,9 +273,10 @@ def cookie_kwargs(secure: bool | None = None) -> dict:
 # Magic links
 # --------------------------------------------------------------------------
 
-# Single-use enforcement. A link sits in an inbox forever; without this,
-# anyone who later reads that mailbox has a working key.
-_USED: set[str] = set()
+# Single-use enforcement lives in the database. It used to be a module-level
+# set, which reset on restart and was not shared between worker processes —
+# under RQ the same link would work once per worker. A link sits in a mailbox
+# forever, so the guard has to outlive the process that issued it.
 
 
 def make_magic_token(email: str) -> str:
@@ -230,12 +288,31 @@ def consume_magic_token(token: str) -> Identity | None:
     if not payload or "email" not in payload:
         return None
     nonce = payload.get("nonce", "")
-    if nonce in _USED:
+    if not nonce:
         return None
-    _USED.add(nonce)
-    if len(_USED) > 10_000:
-        _USED.clear()              # bounded; expiry does the real work
+
+    # Claim the nonce by inserting it. The primary key does the work: a second
+    # use is an IntegrityError rather than a read-then-write race two requests
+    # can both win.
+    try:
+        with session_scope() as s:
+            s.add(UsedMagicToken(nonce=nonce))
+            s.flush()
+    except IntegrityError:
+        return None
+
     return get_or_create_by_email(payload["email"])
+
+
+def prune_used_tokens(older_than_seconds: int = MAGIC_TTL * 4) -> int:
+    """Spent nonces past any possible expiry are dead weight."""
+    from datetime import datetime, timedelta, timezone
+    cutoff = (datetime.now(timezone.utc).replace(tzinfo=None)
+              - timedelta(seconds=older_than_seconds))
+    with session_scope() as s:
+        return s.execute(
+            delete(UsedMagicToken).where(UsedMagicToken.used_at < cutoff)
+        ).rowcount or 0
 
 
 # --------------------------------------------------------------------------
@@ -296,3 +373,119 @@ def delivery_mode() -> str:
     saying so. In dev the link is returned in the response and printed to the
     console; wiring a mail provider is a single function swap."""
     return "console" if not os.environ.get("SMTP_URL") else "smtp"
+
+
+# --------------------------------------------------------------------------
+# Password sign-in
+# --------------------------------------------------------------------------
+
+def find_by_email(email: str) -> Identity | None:
+    """Look up without creating. Sign-in must not create accounts by typo."""
+    addr = (email or "").strip().lower()
+    if not addr:
+        return None
+    with session_scope() as s:
+        user = s.execute(select(User).where(User.email == addr)).scalar_one_or_none()
+        if user is None:
+            return None
+        return Identity(user.id, user.email, user.email.endswith("@guest.local"))
+
+
+def has_password(user_id: int) -> bool:
+    with session_scope() as s:
+        user = s.get(User, user_id)
+        return bool(user and user.password_hash)
+
+
+def set_password(user_id: int, password: str) -> bool:
+    """Set or replace a password. Rotates sessions: a password change that
+    leaves old sessions alive is not a way to recover a compromised account."""
+    from . import passwords
+    from datetime import datetime, timezone
+
+    with session_scope() as s:
+        user = s.get(User, user_id)
+        if user is None:
+            return False
+        user.password_hash = passwords.hash_password(password)
+        user.password_set_at = datetime.now(timezone.utc).replace(tzinfo=None)
+        user.session_nonce = secrets.token_hex(8)
+    return True
+
+
+def check_password(email: str, password: str) -> Identity | None:
+    """Verify a sign-in. None for every failure, with no hint which one.
+
+    A missing account still pays the cost of a hash comparison, so response
+    time does not answer "is this address registered?".
+    """
+    from . import passwords
+
+    addr = (email or "").strip().lower()
+    with session_scope() as s:
+        user = s.execute(select(User).where(User.email == addr)).scalar_one_or_none()
+
+        if user is None or not user.password_hash:
+            passwords.waste_time()
+            return None
+
+        if not passwords.verify_password(password, user.password_hash):
+            return None
+
+        # Cost was raised since this hash was made — upgrade it now, while we
+        # legitimately hold the plaintext.
+        if passwords.needs_rehash(user.password_hash):
+            user.password_hash = passwords.hash_password(password)
+
+        return Identity(user.id, user.email, user.email.endswith("@guest.local"))
+
+
+def create_with_password(email: str, password: str) -> Identity | None:
+    """New account. None if the address is already taken — the caller decides
+    what to say about that, because saying it plainly leaks who has an
+    account."""
+    from . import passwords
+    from datetime import datetime, timezone
+
+    addr = (email or "").strip().lower()
+    with session_scope() as s:
+        existing = s.execute(select(User).where(User.email == addr)).scalar_one_or_none()
+        if existing is not None:
+            return None
+        user = User(
+            email=addr,
+            password_hash=passwords.hash_password(password),
+            password_set_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        )
+        s.add(user)
+        s.flush()
+        return Identity(user.id, user.email, False)
+
+
+# --------------------------------------------------------------------------
+# OAuth account linking
+# --------------------------------------------------------------------------
+
+def link_oauth(email: str, provider: str, subject: str) -> Identity | None:
+    """Resolve a verified provider identity to an account, creating if new.
+
+    Matching is by email because the provider has verified it. If the address
+    already exists — signed up by password or magic link — this links rather
+    than forking a second account, which is what a user expects when they
+    click "Sign in with Google" on an address they already use here.
+    """
+    addr = (email or "").strip().lower()
+    if not addr or "@" not in addr:
+        return None
+
+    with session_scope() as s:
+        user = s.execute(select(User).where(User.email == addr)).scalar_one_or_none()
+        if user is None:
+            user = User(email=addr, oauth_provider=provider, oauth_subject=subject)
+            s.add(user)
+            s.flush()
+        else:
+            if not user.oauth_provider:
+                user.oauth_provider = provider
+                user.oauth_subject = subject
+        return Identity(user.id, user.email, False)

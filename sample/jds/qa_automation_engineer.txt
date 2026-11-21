@@ -1,0 +1,14 @@
+QA Automation Engineer
+
+We're looking for someone to own our regression suite.
+
+You have:
+- Test automation experience with Selenium or Cypress
+- Working knowledge of Python or JavaScript
+- Experience with CI/CD pipelines, ideally GitHub Actions
+- API testing experience
+- Manual testing discipline where automation does not fit
+
+Preferred:
+- Performance testing with k6 or JMeter
+- Experience with Appium for mobile

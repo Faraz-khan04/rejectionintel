@@ -1,0 +1,15 @@
+Frontend Engineer
+
+We are hiring a Frontend Engineer to work on our customer dashboard.
+
+Requirements:
+* 3 years of professional TypeScript and React
+* Solid HTML and CSS fundamentals, including responsive layout
+* Experience with accessibility standards (WCAG 2.1)
+* Familiarity with automated testing using Playwright or Cypress
+* Understanding of REST API consumption
+
+Nice to have:
+* Experience with Svelte or Astro
+* Familiarity with Storybook
+* Web performance work: Core Web Vitals, Lighthouse

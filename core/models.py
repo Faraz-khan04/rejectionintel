@@ -58,6 +58,24 @@ class User(Base):
     # the global signing key (which would sign out everyone, everywhere).
     api_nonce: Mapped[str | None] = mapped_column(String(32))
 
+    # Rotating this invalidates every browser session for this user without
+    # touching the global signing key. That is what "sign out everywhere"
+    # needs: a 30-day cookie you cannot revoke is a 30-day window for anyone
+    # who walked away from a shared machine.
+    session_nonce: Mapped[str | None] = mapped_column(String(32))
+
+    # Password sign-in. Nullable because the original and still-supported way
+    # in is a magic link, and an OAuth account never sets one. A NULL here
+    # means "this account has no password", not "empty password".
+    password_hash: Mapped[str | None] = mapped_column(String(255))
+    password_set_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+    # Which provider vouched for this address, and their stable id for the
+    # user. The id is stored because an email address can be reassigned at a
+    # company domain; the subject cannot.
+    oauth_provider: Mapped[str | None] = mapped_column(String(20))
+    oauth_subject: Mapped[str | None] = mapped_column(String(64))
+
     target_titles: Mapped[list | None] = mapped_column(JSON, default=list)
     salary_expectation_min: Mapped[int | None] = mapped_column(Integer)
     salary_currency: Mapped[str | None] = mapped_column(String(3))
@@ -452,3 +470,40 @@ class Insight(Base):
     narration_model: Mapped[str | None] = mapped_column(String(60))
 
     run: Mapped[AnalysisRun] = relationship(back_populates="insights")
+
+
+# --------------------------------------------------------------------------
+# Auth hardening
+# --------------------------------------------------------------------------
+
+class UsedMagicToken(Base):
+    """Spent sign-in links.
+
+    Replay protection used to live in a process-local set, which meant it
+    reset on every restart and, worse, was not shared between workers — under
+    RQ or any multi-process deploy the same link would work once per process.
+    A magic link sits in a mailbox forever, so this has to be durable.
+
+    The nonce is the primary key, so a second use is an integrity error rather
+    than a read-then-write race.
+    """
+
+    __tablename__ = "used_magic_tokens"
+
+    nonce: Mapped[str] = mapped_column(String(32), primary_key=True)
+    used_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class RateLimitHit(Base):
+    """One row per attempt, counted inside a moving window.
+
+    Rows rather than a counter because a counter needs a window reset, and a
+    reset is a gap an attacker can align with. Old rows are pruned on write.
+    """
+
+    __tablename__ = "rate_limit_hits"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    bucket: Mapped[str] = mapped_column(String(200), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime, index=True,
+                                         server_default=func.now())

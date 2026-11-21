@@ -155,12 +155,69 @@ class SkillVocab:
     # stops "Go" matching inside "Google", but not the standalone word "go" in
     # "go beyond" — and "R" is a letter before it is a language. For these the
     # canonical is NOT a match form; only the explicit aliases are.
+    # Names that are ordinary English words. Never matchable in this exact
+    # spelling, from any entry — the skill must be reached through a qualified
+    # alias ("chef cookbook", "patient triage") or not at all.
+    ENGLISH_WORDS = {
+        "go", "r", "tax", "audit", "brand", "astro", "helm", "celery",
+        "iceberg", "notion", "framer", "lever", "greenhouse", "segment",
+        "beam", "arrow", "hive", "pig", "storm", "drill", "atlas", "nomad",
+        "glue", "fabric", "fusion", "composer", "ray", "chef", "puppet",
+        "salt", "consul", "lambda", "route", "rancher", "operators",
+        "epic", "sage", "prime", "close", "triage",
+        # Legal and manufacturing are unusually full of ordinary words.
+        "brief", "counsel", "discovery", "practice", "matter", "trust",
+        "will", "bar", "lean", "yield", "batch", "plant", "cell", "line",
+        "shift", "inspection", "procurement", "logistics",
+    }
+
     AMBIGUOUS_CANONICALS = {"go", "r", "c#", "c++", "qa", "hr", "ux", "ui", "crm",
-                            "erp", "seo", "etl", "tax", "audit", "brand", "git"}
+                            "erp", "seo", "etl", "tax", "audit", "brand", "git",
+                            # Second expansion: every one of these is a real
+                            # product AND an ordinary English word. "Astro"
+                            # matched "astro-project" in prose during the check
+                            # that added them.
+                            "astro", "helm", "celery", "iceberg", "notion",
+                            "flink", "framer", "lever", "greenhouse", "segment",
+                            # Data engineering: each is a product and a word.
+                            "beam", "arrow", "hive", "pig", "storm", "presto",
+                            "drill", "atlas", "nomad", "glue", "fabric",
+                            "fusion", "composer", "ray", "prefect",
+                            # Cloud & DevOps. Chef, Puppet and Salt are the
+                            # canonical example of this whole rule.
+                            "chef", "puppet", "salt", "packer", "vagrant",
+                            "consul", "nomad", "lambda", "route", "rancher",
+                            "operators", "sentry", "pager",
+                            # Healthcare and finance: vendors and terms of art
+                            # that are also ordinary words.
+                            "epic", "sage", "prime", "close", "basel", "triage",
+                            "xero", "cima", "pals"}
+
+    # Proper nouns that are also ordinary words, where excluding the bare name
+    # would cost more than it saves: a job description writes "experience with
+    # Rust", and guarding it would miss almost every real mention. These match
+    # case-sensitively instead — "Rust" is the language, "rust on the railings"
+    # is not. Verified: all three fired on prose before this existed.
+    CASE_SENSITIVE = {"Rust", "Swift", "Spark"}
 
     def add(self, canonical: str, aliases: list[str] | None = None) -> None:
         forms = {a.lower() for a in (aliases or [])}
-        if canonical.lower() not in self.AMBIGUOUS_CANONICALS:
+
+        # A word in ENGLISH_WORDS must never match in that exact spelling —
+        # not as a canonical, and not as an alias either. "Triage" was excluded
+        # as a canonical and re-added as the alias "triage", which fired on
+        # "triage your inbox".
+        #
+        # AMBIGUOUS_CANONICALS is a weaker rule and deliberately so: "CRM",
+        # "ETL" and "C++" are acronyms, not words, and listing them as their
+        # own alias is how they match at all. Filtering those broke eight
+        # skills outright.
+        forms -= self.ENGLISH_WORDS
+        # An English word is never a matchable canonical either. Keeping the
+        # two exclusions on separate lists meant adding "inspection" to
+        # ENGLISH_WORDS while the canonical check still read the other set, so
+        # "Inspection" matched "under close inspection". One test, both lists.
+        if canonical.lower() not in (self.AMBIGUOUS_CANONICALS | self.ENGLISH_WORDS):
             forms.add(canonical.lower())
         if not forms:
             # An ambiguous name with no aliases would never match anything —
@@ -180,8 +237,15 @@ class SkillVocab:
         hits: dict[str, int] = {}
         for canonical, forms in self.entries.items():
             count = 0
+            cased = canonical in self.CASE_SENSITIVE
             for form in forms:
                 escaped = re.escape(form)
+                if cased and form == canonical.lower():
+                    # Match the capitalised proper noun against the original
+                    # text; the multi-word aliases below stay case-insensitive.
+                    pattern = rf"(?<![A-Za-z0-9]){re.escape(canonical)}(?![A-Za-z0-9+#])"
+                    count += len(re.findall(pattern, text))
+                    continue
                 # C++ / C# / .NET need lookarounds rather than \b
                 pattern = rf"(?<![a-z0-9]){escaped}(?![a-z0-9+#])"
                 count += len(re.findall(pattern, lowered))

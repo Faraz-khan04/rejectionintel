@@ -132,8 +132,29 @@ def bullet_lines(resume_text: str) -> list[tuple[int, str]]:
 
         # A heading or a role/date line ends the previous bullet.
         is_heading = line == line.upper() and len(line) < 44
-        has_dates = bool(re.search(r"(19|20)\d{2}\s*[-\u2013]\s*((19|20)\d{2}|present)", line, re.I))
-        if is_heading or has_dates:
+
+        # Dates. The month between the dash and the year is the common case in
+        # a PDF resume — "Jan 1, 2021 - June 2022", "May 2017- Mar 2019" — and
+        # requiring year-dash-year missed both, so the job title that followed
+        # was read as a continuation and swallowed into the previous bullet.
+        has_dates = bool(re.search(
+            r"(19|20)\d{2}\s*[-\u2013\u2014]\s*"
+            r"(?:[A-Z][a-z]{2,8}\.?\s+)?"          # optional month word
+            r"((19|20)\d{2}|present|current|now)",
+            line, re.I))
+
+        # A job title on its own line carries no date and no bullet marker.
+        # Signature: short, title-case, no terminal punctuation, and the bullet
+        # we are accumulating already ended in a full stop — a wrapped
+        # continuation almost never does both.
+        prev_finished = bool(current) and current[-1].rstrip().endswith((".", "!", "?"))
+        looks_like_title = (
+            len(line.split()) <= 9
+            and not line.rstrip().endswith((".", ",", ";", ":"))
+            and sum(1 for w in line.split() if w[:1].isupper()) >= max(2, len(line.split()) - 2)
+        )
+
+        if is_heading or has_dates or (prev_finished and looks_like_title):
             flush()
             continue
 
@@ -203,6 +224,14 @@ DOMAIN_HINTS: list[tuple[tuple[str, ...], str]] = [
      "__% return over __ months, or drawdown cut to __%"),
     (("test", "coverage", "qa", "bug", "defect"),
      "coverage up to __%, or defects down __%"),
+    (("incident", "soc", "siem", "alert", "detection", "triage", "threat"),
+     "mean time to detect down to __ minutes, or __% fewer false positives"),
+    (("vulnerabilit", "patch", "remediat", "scan", "cve"),
+     "__ critical vulnerabilities closed, or remediation time cut to __ days"),
+    (("firewall", "network security", "segmentation", "vpn", "ids", "ips"),
+     "__ sites migrated, or __ rules consolidated"),
+    (("compliance", "audit", "iso", "nist", "governance", "risk register"),
+     "__ controls implemented, or audit findings down from __ to __"),
     (("deploy", "ci", "cd", "docker", "kubernetes", "infra", "server"),
      "deploy time from __min to __min, or __ services migrated"),
     (("onboard", "signup", "activation", "funnel", "conversion"),
@@ -325,6 +354,20 @@ def analyse_resume(resume_text: str, skills_listed_only: list[str] | None = None
 
         issues.append(LineIssue(line=body, line_no=line_no, problems=problems,
                                 weak_opener=wo, suggestion=suggestion, why=why))
+
+    # Resumes repeat themselves — "Responsible for Complete IT infrastructure
+    # Network and Security" appeared verbatim under two employers on a real CV
+    # and produced two identical action items. Keep the first occurrence; a
+    # reader fixing one has fixed both.
+    seen: set[str] = set()
+    deduped: list[LineIssue] = []
+    for i in issues:
+        key = re.sub(r"[^a-z0-9 ]", "", i.line.lower()).strip()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(i)
+    issues = deduped
 
     issues.sort(key=lambda i: (-i.severity, i.line_no))
     out = issues[:limit]

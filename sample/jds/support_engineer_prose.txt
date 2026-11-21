@@ -1,0 +1,10 @@
+Customer Support Engineer
+
+This posting is written as prose rather than bullets, because plenty of them are.
+
+We need someone who has spent at least two years in a customer support or helpdesk
+role and is comfortable reading logs. You should have working knowledge of SQL so you
+can answer your own questions about a customer's data, familiarity with Zendesk or a
+similar ticketing system, and enough Linux to be dangerous. Experience with Jira for
+escalating to engineering is expected. If you have written documentation before, say
+so, and if you have used Datadog to trace an issue, even better.

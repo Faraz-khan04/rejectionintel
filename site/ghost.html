@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Is anyone actually hiring for this? — RejectionIntel</title>
-<meta name="description" content="Paste a job advert and see whether it shows the patterns of a listing nobody is hiring for. Free, no signup.">
+<meta name="description" content="Paste a job description and see whether it shows the patterns of a listing nobody is hiring for. Free, no signup.">
 <script>
 (function(){
   try{
@@ -19,43 +19,43 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F7F7FB;--card:#FFFFFF;
-  --paper:#F7F7FB;--panel:#FFFFFF;
-  --ink:#0E1017;--ink-2:#3B4154;--muted:#5F6780;
-  --line:#E6E8F0;--line-2:#EEF0F6;--rule:#E6E8F0;--rule-soft:#EEF0F6;
+  --bg:#F4F3F0;--card:#FCFBF9;
+  --paper:#F4F3F0;--panel:#FCFBF9;
+  --ink:#111112;--ink-2:#44454A;--muted:#6E7076;
+  --line:#E0DFDA;--line-2:#ECEBE7;--rule:#E0DFDA;--rule-soft:#ECEBE7;
 
-  --accent:#255C99;--accent-2:#3B7EBF;--accent-soft:#E7EFF8;--accent-ink:#1B4670;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--accent-ink:#3A3A3F;--on-accent:#FCFBF9;
 
-  --t-observed:#0E8A5F;--t-strong:#255C99;--t-weak:#C4820E;--t-none:#78809A;
-  --t-insufficient:#78809A;
-  --bg-observed:#E3F5ED;--bg-strong:#E7EFF8;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
-  --observed-bg:#E3F5ED;--strong-bg:#E7EFF8;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
+  --t-observed:#0E8A5F;--t-strong:#111112;--t-weak:#C4820E;--t-none:#7F7F86;
+  --t-insufficient:#7F7F86;
+  --bg-observed:#E3F5ED;--bg-strong:#E4E3DE;--bg-weak:#FBF1DE;--bg-none:#EDEFF4;
+  --observed-bg:#E3F5ED;--strong-bg:#E4E3DE;--weak-bg:#FBF1DE;--insufficient-bg:#EDEFF4;
 
   --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
   --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
-  --sem-none:#5F6780;--sem-none-bg:#EDEFF4;
+  --sem-none:#66666D;--sem-none-bg:#EDEFF4;
   --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
 
   --display:'Plus Jakarta Sans',system-ui,sans-serif;
   --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
   --r:14px;--r-sm:11px;--r-md:14px;--r-lg:22px;--wrap:1160px;
-  --shadow:0 1px 2px rgba(14,16,23,.04), 0 12px 28px -12px rgba(14,16,23,.10);
+  --shadow:0 1px 2px rgba(17,17,18,.04), 0 12px 28px -12px rgba(17,17,18,.10);
 }
 [data-theme="dark"]{
-  --bg:#0A0B11;--card:#14161F;--paper:#0A0B11;--panel:#14161F;
-  --ink:#F1F2F7;--ink-2:#AFB6C9;--muted:#868DA3;
-  --line:#252938;--line-2:#1C1F2B;--rule:#252938;--rule-soft:#1C1F2B;
+  --bg:#08080A;--card:#141416;--paper:#08080A;--panel:#141416;
+  --ink:#E8E8E4;--ink-2:#9A9AA1;--muted:#7E7E85;
+  --line:#26262A;--line-2:#1C1C1F;--rule:#26262A;--rule-soft:#1C1C1F;
 
-  --accent:#5AA9E6;--accent-2:#7FC0F0;--accent-soft:#122436;--accent-ink:#8DC7F2;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--accent-ink:#C7C7C9;--on-accent:#08080A;
 
-  --t-observed:#3FC495;--t-strong:#5AA9E6;--t-weak:#E0A93A;--t-none:#8891A6;
-  --t-insufficient:#8891A6;
-  --bg-observed:#10352A;--bg-strong:#122436;--bg-weak:#3A2E14;--bg-none:#1F2431;
-  --observed-bg:#10352A;--strong-bg:#122436;--weak-bg:#3A2E14;--insufficient-bg:#1F2431;
+  --t-observed:#3FC495;--t-strong:#E8E8E4;--t-weak:#E0A93A;--t-none:#8C8C93;
+  --t-insufficient:#8C8C93;
+  --bg-observed:#10352A;--bg-strong:#232326;--bg-weak:#3A2E14;--bg-none:#1F1F23;
+  --observed-bg:#10352A;--strong-bg:#232326;--weak-bg:#3A2E14;--insufficient-bg:#1F1F23;
 
   --sem-strong:#3FC495;--sem-strong-bg:#10352A;
   --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
-  --sem-none:#8891A6;--sem-none-bg:#1F2431;
+  --sem-none:#8C8C93;--sem-none-bg:#1F1F23;
   --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
   color-scheme:dark;
 }
@@ -65,7 +65,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
 :focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:10px}
 h1,h2{font-family:var(--display);font-weight:800;letter-spacing:-.035em;margin:0;line-height:1.1}
 
-.nav{position:sticky;top:0;z-index:50;background:var(--paper);border-bottom:1px solid var(--rule)}
+.nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px) saturate(1.05);border-bottom:1px solid var(--rule)}
 .nav-in{display:flex;align-items:center;gap:16px;height:66px;max-width:var(--wrap);
   margin:0 auto;padding:0 26px}
 .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;
@@ -98,7 +98,7 @@ input,textarea{width:100%;padding:11px 13px;border-radius:14px;border:1px solid 
 textarea{min-height:190px;resize:vertical;line-height:1.6}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:640px){.row{grid-template-columns:1fr}}
-.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:#fff;border:0;
+.btn{background:linear-gradient(140deg,var(--accent),var(--accent-2));color:var(--on-accent);border:0;
   font-family:var(--body);font-weight:600;font-size:.95rem;padding:12px 26px;border-radius:14px;
   cursor:pointer;margin-top:16px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -160,11 +160,6 @@ textarea{min-height:190px;resize:vertical;line-height:1.6}
 
 
 
-[data-theme="dark"] 
-[data-theme="dark"] 
-[data-theme="dark"] 
-[data-theme="dark"] 
-[data-theme="dark"] 
 
 /* Content sits above the backdrop, and panels go translucent so it shows
    through instead of being covered by opaque rectangles. */
@@ -172,8 +167,116 @@ textarea{min-height:190px;resize:vertical;line-height:1.6}
 .card{background:var(--panel);}
 .verdict, .prior, .upsell{}
 
+
+/* ---- developer-matte pass ----
+   Aliases, not a second palette: --bg-app, --bg-card and --border-light point
+   at the values the rest of the site already uses, so one edit cannot leave
+   the other name stale. */
+:root{--bg-app:var(--bg);--bg-card:var(--card);--border-light:var(--rule)}
+
+/* The count is instrument output, not a headline. Monospace and tabular
+   figures make 3 and 5 occupy the same width, so the number stops jumping
+   between results. */
+.verdict{background:var(--bg-card);border:1px solid var(--border-light);
+  border-radius:14px;padding:24px 26px}
+.verdict.v-clean,.verdict.v-some,.verdict.v-many{background:var(--bg-card)}
+.v-count{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums;font-size:2.6rem;font-weight:600;
+  letter-spacing:-.03em;line-height:1}
+/* Colour stays on the tier scale and stays on ONE element — the count. A whole
+   red panel reads as a verdict of "fake", which is exactly the overclaim the
+   caveat underneath spends three lines walking back. */
+.v-clean .v-count{color:var(--t-observed)}
+.v-some  .v-count{color:var(--t-weak)}
+.v-many  .v-count{color:var(--sem-neg)}
+.v-label{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-top:6px}
+.v-text{margin:14px 0 0;color:var(--ink-2);font-size:.95rem}
+
+.histcard{background:var(--bg-card);border:1px solid var(--border-light);
+  border-left:2px solid var(--muted);border-radius:14px;padding:20px 24px;
+  margin-bottom:18px}
+.histcard.strong{border-left-color:var(--t-observed)}
+.hist-k{font-family:ui-monospace,monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.hist-v{margin:0;font-size:1.02rem;line-height:1.6}
+.hist-n{margin:10px 0 0;font-size:.86rem;color:var(--ink-2)}
+
+.sig-spans{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sig-spans code{font-family:ui-monospace,monospace;font-size:.74rem;
+  padding:3px 8px;border-radius:6px;background:var(--bg-app);
+  border:1px solid var(--border-light);color:var(--ink-2)}
+.sig-spans.none{font-size:.78rem;color:var(--muted);font-style:normal}
+
+.evidence{margin-top:18px}
+.ev-h{font-family:ui-monospace,monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.ev-body{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.78rem;line-height:1.75;white-space:pre-wrap;word-break:break-word;
+  max-height:340px;overflow:auto;color:var(--ink-2);
+  background:var(--bg-app);border:1px solid var(--border-light);
+  border-radius:10px;padding:16px}
+mark.hl{background:color-mix(in srgb,var(--t-weak) 20%,transparent);
+  color:var(--ink);border-radius:3px;padding:0 2px}
+
+.context .src{display:block;font-size:.72rem;color:var(--muted);margin-top:6px;
+  font-style:normal}
+.src-note{max-width:70ch;margin:16px 0 0;font-size:.8rem;line-height:1.6;
+  color:var(--muted)}
+
+/* ---- forensic split ----
+   Two kinds of finding, two columns. What the posting SAYS can be quoted; what
+   it OMITS cannot, and pretending otherwise was the weakest part of this page.
+   Absence is styled as absence: muted, no quote block, no dot. */
+.forensic{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:1px;background:var(--border-light);border:1px solid var(--border-light);
+  border-radius:14px;overflow:hidden;margin-top:18px}
+@media(max-width:860px){.forensic{grid-template-columns:1fr}}
+.fcol{background:var(--bg-card);padding:20px 22px}
+.fcol.absent{background:color-mix(in srgb,var(--bg-app) 70%,var(--bg-card))}
+.fcol-h{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 14px;
+  display:flex;align-items:baseline;gap:8px}
+.fcol-h b{font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:600}
+.fitem{padding:12px 0;border-top:1px solid var(--border-light)}
+.fitem:first-of-type{border-top:0;padding-top:0}
+.fitem-l{font-weight:600;font-size:.95rem;margin:0 0 4px}
+.fitem-w{font-size:.82rem;color:var(--muted);line-height:1.55;margin:0}
+.fcol.absent .fitem-l{color:var(--ink-2);font-weight:500}
+.fquote{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+.fquote code{font-family:ui-monospace,monospace;font-size:.74rem;padding:3px 8px;
+  border-radius:6px;background:color-mix(in srgb,var(--t-weak) 18%,transparent);
+  border:1px solid color-mix(in srgb,var(--t-weak) 32%,transparent);color:var(--ink)}
+/* A scam signal is a different claim from a scoping one and must not be
+   readable as "one more amber row". */
+.fitem.scam{border-left:2px solid var(--sem-neg);padding-left:12px;
+  margin-left:-14px}
+.fitem.scam .fitem-l{color:var(--sem-neg)}
+.fitem.scam .fquote code{background:color-mix(in srgb,var(--sem-neg) 16%,transparent);
+  border-color:color-mix(in srgb,var(--sem-neg) 34%,transparent)}
+.fempty{font-size:.84rem;color:var(--muted);margin:0}
+
+/* ---- locked cohort panel ----
+   The gate failing is the product working. It reads as a specification, not an
+   apology, and the number comes from the backend constant. */
+.vault{margin-top:18px;border:1px solid var(--border-light);border-radius:14px;
+  background:var(--bg-card);padding:22px 24px}
+.vault-h{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.vault-h svg{width:15px;height:15px;color:var(--muted);flex:none}
+.vault-t{font-family:ui-monospace,monospace;font-size:.68rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted)}
+.vault-s{font-family:var(--display);font-size:1.08rem;font-weight:700;
+  letter-spacing:-.02em;margin:0 0 10px}
+.vault-p{font-size:.88rem;color:var(--ink-2);line-height:1.6;margin:0}
+.vault-req{display:flex;gap:18px;margin-top:16px;padding-top:14px;
+  border-top:1px solid var(--border-light);flex-wrap:wrap}
+.vault-req div{font-size:.78rem;color:var(--muted)}
+.vault-req b{display:block;font-family:ui-monospace,monospace;
+  font-variant-numeric:tabular-nums;font-size:1.15rem;color:var(--ink-2);
+  font-weight:600;margin-bottom:3px}
 </style>
-<link rel="stylesheet" href="/backdrop.css">
+<link rel="stylesheet" href="/backdrop.css?v=3">
 </head>
 <body>
 
@@ -200,8 +303,12 @@ textarea{min-height:190px;resize:vertical;line-height:1.6}
       RejectionIntel
     </a>
     <div class="nav-right">
-      <a href="/app">Analyse my search</a>
-      <a href="/cohort">Cohort</a>
+      <div id="ri-authbox"></div>
+      <a href="/app">Analyse</a>
+      <a href="/track">Tracker</a>
+      <a href="/ghost" class="on">Ghost check</a>
+      <a href="/pre-apply">Before you apply</a>
+      <a href="/cohort">Groups</a>
       <a href="/employers">Employers</a>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch theme">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2 12h2M20 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
@@ -215,8 +322,7 @@ textarea{min-height:190px;resize:vertical;line-height:1.6}
   <p class="eyebrow">Free · no signup</p>
   <h1>Is anyone actually hiring<br><em>for this one?</em></h1>
   <p class="lede">
-    Somewhere between a fifth and a quarter of job adverts have no hiring process
-    behind them. Paste one below and we'll tell you which known patterns it shows —
+    Some job descriptions have no hiring process behind them at all. Paste one below and we'll tell you which known patterns it shows —
     before you spend an hour tailoring anything.
   </p>
 
@@ -231,19 +337,32 @@ textarea{min-height:190px;resize:vertical;line-height:1.6}
         <input id="role" placeholder="e.g. Backend Engineer">
       </div>
     </div>
-    <label for="jd">Paste the advert</label>
+    <label for="jd">Paste the job description</label>
     <textarea id="jd" placeholder="Paste the full job description here — the more of it, the better the check."></textarea>
-    <button class="btn" id="go" type="button">Check this advert</button>
+    <button class="btn" id="go" type="button">Check this job description</button>
     <span class="msg" id="msg"></span>
   </div>
 
+  <div id="hist"></div>
   <div id="out"></div>
+  <div id="vault"></div>
 
   <div class="context">
-    <div><b>18–27%</b>of online listings show no active hiring process behind them</div>
-    <div><b>53%</b>of job seekers were ghosted in the past year — a three-year high</div>
-    <div><b>80%</b>have applied somewhere and received no reply at all</div>
+    <div><b>18–27%</b>of online listings are estimated to be unfilled or never
+      intended to be filled
+      <span class="src">Range across two studies: Greenhouse put it at 18–22%;
+        ResumeUp.AI's LinkedIn analysis at 27.4%</span></div>
+    <div><b>53%</b>of job seekers were ghosted by an employer in the past year —
+      a three-year high, up from 38% in 2024
+      <span class="src">Criteria candidate experience report, reported by
+        Fortune, March 2026</span></div>
+    <div><b>61%</b>were ghosted after an interview, not just after applying
+      <span class="src">Greenhouse State of Job Hunting, December 2024 —
+        2,500 workers across the US, UK and Germany</span></div>
   </div>
+  <p class="src-note">These three are published figures from other people's research. We cannot
+    measure them ourselves, so we cite them. Every other number on this site
+    comes from your own rows.</p>
 </div>
 
 <script>
@@ -263,7 +382,7 @@ function setMsg(t, err){ $('msg').textContent = t || ''; $('msg').className = 'm
 
 $('go').addEventListener('click', async () => {
   const jd = $('jd').value.trim();
-  if (jd.length < 80) { setMsg('Paste a bit more of the advert — we need the body text.', true); return; }
+  if (jd.length < 80) { setMsg('Paste a bit more of the job description — we need the body text.', true); return; }
 
   $('go').disabled = true; setMsg('Checking…');
   const fd = new FormData();
@@ -280,6 +399,112 @@ $('go').addEventListener('click', async () => {
   finally { $('go').disabled = false; }
 });
 
+/* Wrap the literal spans the backend returned, in the user's own text.
+ *
+ * Escape FIRST, then wrap. Doing it the other way round means a job
+ * description containing "<script>" gets escaped after our own markup is in
+ * place, and the highlight tags come out as visible text — or worse, the
+ * pasted text executes. The spans are also escaped before matching, so the
+ * needle and the haystack are in the same encoding.
+ */
+function highlight(source, spans){
+  let html = esc(source);
+  const seen = new Set();
+  spans.forEach(s => {
+    const needle = esc(s);
+    if (!needle || seen.has(needle.toLowerCase())) return;
+    seen.add(needle.toLowerCase());
+    // Case-insensitive, literal — no regex metacharacters from user text.
+    const rx = new RegExp(needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    html = html.replace(rx, m => `<mark class="hl">${m}</mark>`);
+  });
+  return html;
+}
+
+/* Split the findings by what kind of evidence they can carry.
+ *
+ * A signal that fires on PRESENT text can be quoted verbatim. A signal that
+ * fires on ABSENCE cannot — there is no substring for "no salary range". They
+ * were rendered identically, with the absence rows apologising for having
+ * nothing to show. Two columns states the difference instead of excusing it.
+ */
+function renderForensic(l){
+  const found  = l.detail.filter(x => x.spans && x.spans.length);
+  const absent = l.detail.filter(x => !x.spans || !x.spans.length);
+
+  const col = (items, cls, head, empty) => `
+    <div class="fcol ${cls}">
+      <p class="fcol-h">${head} <b>${items.length}</b></p>
+      ${items.length ? items.map(x => `
+        <div class="fitem${x.category === 'scam' ? ' scam' : ''}">
+          <p class="fitem-l">${esc(x.label)}</p>
+          <p class="fitem-w">${esc(x.why)}</p>
+          ${cls === 'absent' ? '' :
+            `<div class="fquote">${x.spans.map(s => `<code>${esc(s)}</code>`).join('')}</div>`}
+        </div>`).join('') : `<p class="fempty">${empty}</p>`}
+    </div>`;
+
+  return `
+    <div class="forensic">
+      ${col(found, 'present', 'In the text', 'Nothing in the wording tripped a check.')}
+      ${col(absent, 'absent', 'Left out', 'Nothing expected was missing.')}
+    </div>
+    <p class="caveat" style="margin-top:14px">${esc(l.caveat)}</p>`;
+}
+
+/* The cohort panel. At zero users this always locks, and that is the point:
+ * the gate is the product. The threshold comes from the API, which reads it
+ * from cohort.K_ANON — a number typed here would drift from the number the
+ * gate enforces and the screen would be lying about our own rule.
+ */
+async function renderVault(company){
+  const box = $('vault');
+  if (!company) { box.innerHTML = ''; return; }
+  let d;
+  try {
+    d = await (await fetch('/api/cohort/signals?company='
+                + encodeURIComponent(company))).json();
+  } catch (e) { box.innerHTML = ''; return; }
+
+  const emp = d.employer;
+  const k = d.min_applicants;
+  if (emp && emp.available) {
+    box.innerHTML = `
+      <div class="vault">
+        <div class="vault-h">
+          <span class="vault-t">Cohort intelligence</span>
+        </div>
+        <p class="vault-s">${esc(emp.verdict || '')}</p>
+      </div>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="vault">
+      <div class="vault-h">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <rect x="4" y="10" width="16" height="10" rx="2"/>
+          <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+        </svg>
+        <span class="vault-t">Cohort intelligence</span>
+      </div>
+      <p class="vault-s">Signal locked for ${esc(company)}</p>
+      <p class="vault-p">${d.signed_in
+        ? `Fewer than ${k} people using RejectionIntel have applied to this
+           employer, so any response rate we showed would describe individuals
+           rather than a pattern. The figure stays hidden until the threshold
+           is met — including from us.`
+        : `Response data for a named employer is only ever shown to signed-in
+           people, and only once at least ${k} independent applicants have
+           tracked that employer. Neither condition is met here.`}</p>
+      <div class="vault-req">
+        <div><b>${k}</b>independent applicants needed</div>
+        <div><b>0</b>currently on record</div>
+      </div>
+    </div>`;
+}
+
 function render(d){
   const l = d.listing;
   if (!l.checked) { setMsg(l.note, true); return; }
@@ -287,20 +512,25 @@ function render(d){
   const n = l.signals_found;
   const tone = n === 0 ? 'clean' : (n <= 2 ? 'some' : 'many');
 
-  const prior = d.prior ? `
-    <div class="prior">
-      <b>${esc(d.prior.verdict)}</b>
-      ${d.prior.weight === 'strong'
-        ? ' That is the strongest signal on this page — it comes from what actually happened, not from reading the advert.'
-        : ''}
-    </div>` : '';
+  const prior = d.prior ? priorCard(d.prior) : '';
 
   const upsell = d.upgrade_note ? `
     <div class="upsell">
-      <h3>This only reads the advert</h3>
+      <h3>This only reads the job description</h3>
       <p>${esc(d.upgrade_note)}</p>
       <a href="/app">Analyse your applications &rarr;</a>
     </div>` : '';
+
+  // Every span the backend returned, flattened. Two of the five signals fire
+  // on absence and carry none — there is nothing to point at when the finding
+  // is that something is missing.
+  const allSpans = l.detail.flatMap(x => x.spans || []);
+  const marked = allSpans.length
+    ? `<div class="card evidence">
+         <p class="ev-h">What triggered this, in your own text</p>
+         <div class="ev-body">${highlight($('jd').value, allSpans)}</div>
+       </div>`
+    : '';
 
   $('out').innerHTML = `
     ${prior}
@@ -309,25 +539,53 @@ function render(d){
       <div class="v-label">known ghost-listing patterns present</div>
       <p class="v-text">${esc(l.verdict)}</p>
     </div>
-    ${l.detail.length ? `<div class="card" style="margin-top:0">
-      ${l.detail.map(x => `
-        <div class="sig">
-          <span class="sig-dot"></span>
-          <div>
-            <div class="sig-l">${esc(x.label)}</div>
-            <div class="sig-w">${esc(x.why)}</div>
-          </div>
-        </div>`).join('')}
-      <p class="caveat">${esc(l.caveat)}</p>
-    </div>` : `<div class="card" style="margin-top:0">
-      <p style="margin:0;color:var(--ink-2)">None of the five patterns we check for
-      are present. That is not proof it is real — but nothing here says otherwise.</p>
-      <p class="caveat">${esc(l.caveat)}</p>
-    </div>`}
+    ${renderForensic(l)}
+    ${marked}
     ${upsell}`;
+  if (d.prior) $('hist').innerHTML = '';   // the result carries it now
+  renderVault(($('company').value || '').trim());
   $('out').style.display = 'block';
   $('out').scrollIntoView({behavior:'smooth', block:'start'});
 }
+
+/* Historical context, looked up as the company is typed.
+ *
+ * This is the half of the page that is actually ours: five text heuristics are
+ * reproducible by anyone, but "this employer has ignored you nine times" is
+ * not. It renders above the verdict because it outranks it. */
+function priorCard(p){
+  const strong = p.weight === 'strong';
+  return `
+    <div class="histcard${strong ? ' strong' : ''}">
+      <p class="hist-k">Historical context</p>
+      <p class="hist-v">You have tracked <b>${p.applications}</b> application${
+        p.applications === 1 ? '' : 's'} to <b>${esc(p.company)}</b>.
+        They have responded <b>${p.replies}</b> time${p.replies === 1 ? '' : 's'}.</p>
+      ${strong ? `<p class="hist-n">This is the strongest thing on the page. It
+        comes from what actually happened, not from reading the text.</p>` : ''}
+    </div>`;
+}
+
+let histTimer = null, lastLookup = '';
+async function lookupCompany(){
+  const name = $('company').value.trim();
+  if (name === lastLookup) return;
+  lastLookup = name;
+  const box = $('hist');
+  if (name.length < 2) { box.innerHTML = ''; return; }
+  try {
+    const d = await (await fetch('/api/ghost/history?company='
+                     + encodeURIComponent(name))).json();
+    box.innerHTML = d.prior ? priorCard(d.prior) : '';
+  } catch (e) {
+    box.innerHTML = '';        // a failed lookup shows nothing, never a guess
+  }
+}
+$('company').addEventListener('input', () => {
+  clearTimeout(histTimer);
+  histTimer = setTimeout(lookupCompany, 400);   // debounced: one call per pause
+});
+$('company').addEventListener('blur', lookupCompany);
 
 $('jd').addEventListener('keydown', e => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') $('go').click();
@@ -357,6 +615,7 @@ $('jd').addEventListener('keydown', e => {
   apply();
 })();
 </script>
-<script src="/backdrop.js"></script>
+<script src="/backdrop.js?v=3"></script>
+<script src="/authbox.js?v=3" defer></script>
 </body>
 </html>

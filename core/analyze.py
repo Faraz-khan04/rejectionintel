@@ -67,8 +67,24 @@ def _requirements_from_jd(jd: str, title: str, vocab: SkillVocab) -> JobRequirem
 
 
 _DATE_RANGE = re.compile(
-    r"(\d{4})\s*[-–—]\s*(present|current|now|\d{4})", re.I
+    # The month between the dash and the year is the normal way a resume writes
+    # a range — "Jan 1, 2021 - June 2022", "May 2017- Mar 2019". Requiring
+    # year-dash-year saw one role in five on a real CV and reported 4.7 years
+    # of experience for someone with nine, which is the kind of wrong a reader
+    # notices in the first sentence and does not forgive.
+    #
+    # The leading month is captured too, so a range starting in November is not
+    # counted as a full year.
+    r"(?:(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+)?"
+    r"(?:\d{1,2},?\s+)?"
+    r"(\d{4})\s*[-–—]\s*"
+    r"(?:(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+)?"
+    r"(?:\d{1,2},?\s+)?"
+    r"(present|current|now|\d{4})", re.I
 )
+
+_MONTHS = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+           "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
 
 
 def parse_resume(text: str, vocab: SkillVocab, today: date | None = None) -> CandidateProfile:
@@ -87,10 +103,12 @@ def parse_resume(text: str, vocab: SkillVocab, today: date | None = None) -> Can
 
     tenures = []
     for m in _DATE_RANGE.finditer(text):
-        start_year = int(m.group(1))
-        end_raw = m.group(2)
-        end = None if end_raw.lower() in {"present", "current", "now"} else date(int(end_raw), 1, 1)
-        tenures.append(Tenure(date(start_year, 1, 1), end))
+        start_month = _MONTHS.get((m.group(1) or "").lower()[:3], 1)
+        start_year = int(m.group(2))
+        end_raw = m.group(3)
+        end = (None if end_raw.lower() in {"present", "current", "now"}
+               else date(int(end_raw), 12, 31))
+        tenures.append(Tenure(date(start_year, start_month, 1), end))
 
     months = merge_tenure_months(tenures, today=today)
 

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — RejectionIntel</title>
+<meta name="description" content="Sign in to RejectionIntel with a one-time link. No password to remember, lose or reuse.">
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('ri-theme');
+    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (sysDark ? 'dark' : 'light'));
+  }catch(e){ document.documentElement.setAttribute('data-theme','light'); }
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F3F0;--card:#FCFBF9;--ink:#111112;--ink-2:#44454A;--muted:#6E7076;
+  --line:#E0DFDA;--rule-soft:#ECEBE7;
+  --accent:#2A2A2E;--accent-2:#111112;--accent-soft:#E8E7E2;--on-accent:#FCFBF9;
+  --sem-strong:#0E8A5F;--sem-strong-bg:#E3F5ED;
+  --sem-maybe:#C4820E;--sem-maybe-bg:#FBF1DE;
+  --sem-none:#66666D;--sem-none-bg:#EDEFF4;
+  --sem-neg:#C4433F;--sem-neg-bg:#FBEAEA;
+  --display:'Plus Jakarta Sans',system-ui,sans-serif;
+  --body:'Inter',system-ui,sans-serif;--mono:ui-monospace,monospace;
+  --r:14px;--r-sm:11px;
+  --shadow:0 1px 2px rgba(17,17,18,.04), 0 12px 28px -12px rgba(17,17,18,.10);
+}
+[data-theme="dark"]{
+  --bg:#08080A;--card:#141416;--ink:#E8E8E4;--ink-2:#9A9AA1;--muted:#7E7E85;
+  --line:#26262A;--rule-soft:#1C1C1F;
+  --accent:#C7C7C9;--accent-2:#E8E8E4;--accent-soft:#1C1C1F;--on-accent:#08080A;
+  --sem-strong:#3FC495;--sem-strong-bg:#10352A;
+  --sem-maybe:#E0A93A;--sem-maybe-bg:#3A2E14;
+  --sem-none:#8C8C93;--sem-none-bg:#1F1F23;
+  --sem-neg:#F0776F;--sem-neg-bg:#3A1D1D;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);
+  min-height:100vh;display:flex;flex-direction:column}
+
+.nav{position:sticky;top:0;z-index:80;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px) saturate(1.05);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1160px;margin:0 auto;padding:14px 22px;display:flex;
+  align-items:center;justify-content:space-between}
+.brand{font:700 17px var(--display);color:var(--ink);text-decoration:none;
+  letter-spacing:-.02em}
+.nav a.back{font-size:13.5px;color:var(--muted);text-decoration:none}
+.nav a.back:hover{color:var(--ink)}
+
+main{flex:1;display:flex;align-items:flex-start;justify-content:center;
+  padding:56px 22px 40px}
+.card{width:100%;max-width:440px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:30px;box-shadow:var(--shadow)}
+h1{font:700 26px/1.2 var(--display);margin:0 0 8px;letter-spacing:-.02em}
+.lede{color:var(--ink-2);font-size:14.5px;margin:0 0 22px}
+
+label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;
+  text-transform:uppercase;letter-spacing:.07em}
+input[type=email]{width:100%;padding:11px 13px;border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--bg);color:var(--ink);
+  font:15px var(--body)}
+input[type=email]:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+button{width:100%;margin-top:14px;padding:12px;border:0;border-radius:var(--r-sm);
+  background:var(--accent);color:var(--on-accent);font:600 15px var(--body);cursor:pointer}
+button:hover{background:var(--accent-2)}
+button[disabled]{opacity:.6;cursor:default}
+button.ghost{background:none;border:1px solid var(--line);color:var(--ink-2);
+  font-weight:500;margin-top:10px}
+
+.state{margin-top:18px;padding:13px 15px;border-radius:var(--r-sm);font-size:14px;
+  line-height:1.55;border:1px solid transparent}
+.state.ok{background:var(--sem-strong-bg);color:var(--sem-strong)}
+.state.warn{background:var(--sem-maybe-bg);color:var(--sem-maybe)}
+.state.bad{background:var(--sem-neg-bg);color:var(--sem-neg)}
+.state.flat{background:var(--sem-none-bg);color:var(--ink-2)}
+.state a{color:inherit;font-family:var(--mono);font-size:12px;word-break:break-all}
+
+.why{margin-top:26px;padding-top:20px;border-top:1px solid var(--rule-soft)}
+.why h2{font:600 11.5px var(--body);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 12px}
+.why ul{margin:0;padding:0;list-style:none}
+.why li{font-size:13.5px;color:var(--ink-2);padding:7px 0;
+  border-bottom:1px solid var(--rule-soft)}
+.why li:last-child{border-bottom:0}
+.why b{color:var(--ink);font-weight:600}
+
+.signed{margin-top:18px;padding-top:18px;border-top:1px solid var(--rule-soft);
+  font-size:13.5px;color:var(--ink-2)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/">RejectionIntel</a>
+    <a class="back" href="/app">Back to the app</a>
+  </div>
+</nav>
+
+<main>
+  <div class="card">
+
+    <h1>Sign in</h1>
+    <p class="lede">We send a one-time link. There is no password, so there is
+      nothing to remember, reuse, or have stolen from another site.</p>
+
+    <form id="form" autocomplete="on">
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" required
+             autocomplete="email" placeholder="you@example.com">
+      <button type="submit" id="submit">Send me a link</button>
+    </form>
+
+    <div class="state hidden" id="state"></div>
+
+    <div class="signed hidden" id="signed">
+      <p id="signedAs" style="margin:0 0 10px"></p>
+      <button class="ghost" id="logoutAll">Sign out on every device</button>
+    </div>
+
+    <div class="why">
+      <h2>How this is kept safe</h2>
+      <ul>
+        <li><b>The link expires in 15 minutes</b> and works exactly once. A
+          second click does nothing, so an old email in your inbox is not a
+          spare key.</li>
+        <li><b>We never say whether an address has an account.</b> The answer
+          is identical either way — otherwise anyone could test an address and
+          learn that person is job hunting.</li>
+        <li><b>Repeated attempts are throttled</b>, so nobody can use this form
+          to flood someone else's inbox.</li>
+        <li><b>Your session cookie cannot be read by scripts</b> and you can
+          revoke every device from here at any time.</li>
+      </ul>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function show(el, cls, html) {
+  el.className = "state " + cls;
+  el.innerHTML = html;
+  el.classList.remove("hidden");
+}
+
+/* Reflect what the verify redirect told us, so an expired link explains
+   itself here rather than dumping the user on the app with a query string. */
+const params = new URLSearchParams(location.search);
+if (params.get("auth") === "expired") {
+  show($("state"), "warn",
+    "That link has expired or was already used. Enter your address and " +
+    "we'll send a fresh one.");
+}
+
+async function refreshMe() {
+  try {
+    const me = await (await fetch("/api/auth/me")).json();
+    if (me.signed_in) {
+      $("signedAs").textContent = "Signed in as " + me.display + ".";
+      $("signed").classList.remove("hidden");
+    }
+  } catch (e) { /* offline; the form still works */ }
+}
+refreshMe();
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = $("email").value.trim();
+  if (!email) return;
+
+  $("submit").disabled = true;
+  $("submit").textContent = "Sending…";
+
+  try {
+    const body = new FormData();
+    body.append("email", email);
+    const res = await fetch("/api/auth/request", { method: "POST", body });
+    const data = await res.json();
+
+    if (res.status === 429) {
+      show($("state"), "warn", data.detail || "Too many attempts. Try later.");
+    } else if (!res.ok) {
+      show($("state"), "bad", data.detail || "Something went wrong.");
+    } else if (data.mode === "console") {
+      // Development: no mail provider is configured and pretending otherwise
+      // would send the user to an inbox that will never receive anything.
+      show($("state"), "flat",
+        "No mail provider is configured on this server, so the link is " +
+        "below instead of in your inbox.<br><a href=\\"" + data.link +
+        "\\">Open the sign-in link</a>");
+    } else {
+      show($("state"), "ok",
+        "If that address is valid, a link is on its way. It expires in 15 " +
+        "minutes and works once. Check your spam folder if it does not " +
+        "arrive.");
+    }
+  } catch (err) {
+    show($("state"), "bad", "Could not reach the server.");
+  }
+
+  $("submit").disabled = false;
+  $("submit").textContent = "Send me a link";
+});
+
+$("logoutAll").addEventListener("click", async () => {
+  const res = await fetch("/api/auth/logout-everywhere", { method: "POST" });
+  const data = await res.json();
+  if (res.ok) {
+    $("signed").classList.add("hidden");
+    show($("state"), "flat", data.note || "Signed out everywhere.");
+  } else {
+    show($("state"), "bad", data.detail || "Could not sign out.");
+  }
+});
+</script>
+
+</body>
+</html>

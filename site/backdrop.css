@@ -6,6 +6,16 @@
  * THE STRUCTURAL RULE: the scroll transform and the keyframe animation live on
  * DIFFERENT elements. Put both on one and the parallax overwrites the
  * animation, so the orb stops spinning the moment the user scrolls.
+ *
+ * MONOCHROME. There is no hue anywhere in this file. The only saturated
+ * colours in the product are the four tier colours, which encode confidence —
+ * if the backdrop borrowed one of them the funnel bars would stop reading as
+ * a signal. Everything here is a neutral grey.
+ *
+ * ON LIGHT THE ORB IS DARKER THAN THE PAGE. Inverting the dark theme's light
+ * orb onto paper gives light-on-light, which is invisible. On paper it reads
+ * as a shadow cast across the sheet; the white inner highlight is what keeps
+ * it spherical rather than a flat grey stain.
  */
 
 .stage{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:.72}
@@ -17,46 +27,170 @@
 .orb{
   position:absolute;top:-6%;right:4%;
   width:clamp(380px,44vw,660px);aspect-ratio:1;border-radius:50%;
-  background:conic-gradient(from 0deg,#1B4670,#255C99,#3B7EBF,#79B4DE,#255C99,#1B4670);
-  filter:blur(58px);opacity:.46;
+  background:conic-gradient(from 0deg,#E4E2DC,#C6C4BE,#9B9992,#CFCDC7,#AFADA7,#E4E2DC);
+  filter:blur(58px);opacity:.62;
   animation:orbSpin 38s linear infinite;
 }
 .orb::after{
   content:"";position:absolute;inset:20%;border-radius:50%;
-  background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.85),transparent 62%);
+  background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.9),transparent 60%);
 }
 .orb-ring{
   position:absolute;top:-6%;right:4%;
   width:clamp(380px,44vw,660px);aspect-ratio:1;border-radius:50%;
-  border:1.5px solid rgba(59,126,191,.22);
+  border:1.5px solid rgba(17,17,18,.07);
   animation:orbBreathe 13s ease-in-out infinite reverse;
 }
 .au{position:absolute;border-radius:50%;filter:blur(84px);will-change:transform}
-.au1{width:46vw;height:40vw;right:22%;top:2%;background:radial-gradient(circle,rgba(37,92,153,.5),transparent 68%);animation:drift1 23s ease-in-out infinite}
-.au2{width:38vw;height:36vw;right:2%;top:38%;background:radial-gradient(circle,rgba(59,126,191,.46),transparent 68%);animation:drift2 31s ease-in-out infinite}
-.au3{width:32vw;height:30vw;right:38%;top:46%;background:radial-gradient(circle,rgba(90,169,230,.32),transparent 68%);animation:drift3 19s ease-in-out infinite}
-.au4{width:34vw;height:30vw;right:56%;top:-6%;background:radial-gradient(circle,rgba(127,192,240,.3),transparent 68%);animation:drift4 37s ease-in-out infinite}
+.au1{width:46vw;height:40vw;right:22%;top:2%;background:radial-gradient(circle,rgba(150,148,142,.30),transparent 68%);animation:drift1 23s ease-in-out infinite}
+.au2{width:38vw;height:36vw;right:2%;top:38%;background:radial-gradient(circle,rgba(120,118,112,.22),transparent 68%);animation:drift2 31s ease-in-out infinite}
+.au3{width:32vw;height:30vw;right:38%;top:46%;background:radial-gradient(circle,rgba(184,182,176,.34),transparent 68%);animation:drift3 19s ease-in-out infinite}
+.au4{width:34vw;height:30vw;right:56%;top:-6%;background:radial-gradient(circle,rgba(160,158,152,.26),transparent 68%);animation:drift4 37s ease-in-out infinite}
 @keyframes orbSpin{to{transform:rotate(360deg)}}
 @keyframes orbBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
 @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-7%,5%) scale(1.14)}66%{transform:translate(5%,-4%) scale(.92)}}
 @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}40%{transform:translate(6%,-6%) scale(1.1)}75%{transform:translate(-5%,4%) scale(.95)}}
 @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-8%,-5%) scale(1.18)}}
 @keyframes drift4{0%,100%{transform:translate(0,0) scale(1)}45%{transform:translate(7%,7%) scale(1.12)}80%{transform:translate(-4%,-3%) scale(.96)}}
-[data-theme="dark"] .orb{opacity:.58}
-[data-theme="dark"] .orb::after{background:radial-gradient(circle at 34% 30%,rgba(175,210,240,.55),transparent 62%)}
-[data-theme="dark"] .orb-ring{border-color:rgba(127,192,240,.18)}
+
+/* Dark: the orb becomes lighter than its ground — a glow behind the page
+   rather than a shadow on it. Same geometry, inverted relationship. */
+[data-theme="dark"] .orb{
+  background:conic-gradient(from 0deg,#1C1C1F,#3A3A3F,#6E6E75,#C7C7C9,#6E6E75,#1C1C1F);
+  opacity:.40}
+[data-theme="dark"] .orb::after{background:radial-gradient(circle at 34% 30%,rgba(232,232,228,.55),transparent 62%)}
+[data-theme="dark"] .orb-ring{border-color:rgba(232,232,228,.10)}
+[data-theme="dark"] .au1{background:radial-gradient(circle,rgba(150,150,158,.20),transparent 68%)}
+[data-theme="dark"] .au2{background:radial-gradient(circle,rgba(198,198,202,.16),transparent 68%)}
+[data-theme="dark"] .au3{background:radial-gradient(circle,rgba(110,110,117,.20),transparent 68%)}
+[data-theme="dark"] .au4{background:radial-gradient(circle,rgba(140,140,148,.16),transparent 68%)}
+[data-theme="dark"] .stage{opacity:.82}
+[data-theme="dark"] .au{opacity:.9}
 
 @media (prefers-reduced-motion:reduce){
   .orb,.orb-ring,.orb-breathe,.au{animation:none}
 }
 @media(max-width:980px){.orb,.orb-ring{right:-14%;top:-14%}.au{filter:blur(58px)}}
-[data-theme="dark"] .stage{opacity:.82}
-[data-theme="dark"] .au{opacity:.9}
 
-/* Content above the backdrop; panels translucent so the orb shows through
- * rather than being hidden behind opaque rectangles. */
-.nav,.wrap,header,main,footer{position:relative;z-index:1}
-.panel,.card,.col,.pf,.kpi{
-  background:color-mix(in srgb,var(--panel) 88%,transparent);
-  backdrop-filter:blur(14px) saturate(1.3);
+/* ---------------------------------------------------------------------------
+ * GRAIN
+ *
+ * Not only decorative. The orb is blurred 58px over a near-flat ground, and
+ * large soft gradients band visibly on 8-bit displays — you can see the
+ * concentric steps. Noise dithers them away. Same reason film grain survived
+ * into digital grading.
+ *
+ * multiply on light so it darkens into the tone; overlay on dark so it does
+ * not fog the page grey.
+ * ------------------------------------------------------------------------ */
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+  opacity:.09;mix-blend-mode:multiply;
 }
+[data-theme="dark"] .grain{opacity:.26;mix-blend-mode:overlay}
+
+/* ---------------------------------------------------------------------------
+ * CONTOUR
+ *
+ * Topographic ridges along the bottom edge. Generated from three superimposed
+ * sine terms per line, each line phase-shifted, so nothing repeats across the
+ * width — a tiled pattern announces itself the moment the eye finds the seam.
+ *
+ * It lives on the bottom strip only. The guilloche that was here ran behind
+ * the orb and the two line systems interfered; a band pinned to the floor
+ * cannot collide with a light source in the upper right.
+ * ------------------------------------------------------------------------ */
+.contour{
+  position:fixed;left:0;right:0;bottom:0;height:min(38vh,340px);
+  pointer-events:none;z-index:1;opacity:.10;
+  background-image:url("/contour.svg?v=3");
+  background-size:100% 100%;background-repeat:no-repeat;background-position:bottom;
+  -webkit-mask-image:linear-gradient(0deg,#000 6%,rgba(0,0,0,.5) 46%,transparent 92%);
+  mask-image:linear-gradient(0deg,#000 6%,rgba(0,0,0,.5) 46%,transparent 92%);
+}
+[data-theme="dark"] .contour{opacity:.13;filter:invert(1)}
+@media(max-width:980px){.contour{height:26vh;opacity:.07}}
+
+/* ---------------------------------------------------------------------------
+ * SURFACES
+ *
+ * Content sits above the backdrop. Panels are translucent so the orb shows
+ * through rather than being hidden behind opaque rectangles, and carry a
+ * brushed sheen plus their own grain so the edge between card and page is a
+ * material change rather than only a border.
+ *
+ * On paper the sheen is DARK strokes: a milled surface in daylight shows its
+ * grooves as shadow. On charcoal they are light, catching a light source.
+ * ------------------------------------------------------------------------ */
+.wrap,header,main,footer{position:relative;z-index:2}
+/* The nav sets its own position (sticky). Declaring position here would
+   override it — this file is linked after every page's inline style, so at
+   equal specificity it wins. Raise the layer only. */
+.nav{z-index:80}
+
+/* ---------------------------------------------------------------------------
+ * CARD SURFACE — carbon weave
+ *
+ * A 2x2 twill: two diagonal rulings at +45 and -45, offset by half a tile so
+ * the tiles alternate direction. That alternation is what reads as woven cloth
+ * rather than as hatching — a single direction is just a sheen.
+ *
+ * Three layers, in paint order:
+ *   1. the weave          (structure, 8px tile)
+ *   2. a directional wash (a light source, so the surface has a top-left)
+ *   3. grain              (breaks the banding a large soft wash produces)
+ *
+ * Kept to genuine surfaces. Applying this to buttons, pills and progress bars
+ * would turn texture into noise — those are objects ON the surface, not the
+ * surface itself.
+ * ------------------------------------------------------------------------ */
+:root{
+  /* One ruling, not two. The 2x2 twill that briefly replaced this was a more
+     literal carbon fibre and read as noise at card size: two directions at a
+     legible alpha is a pattern the eye follows instead of a surface it sits
+     on. A single 102-degree ruling at a low alpha is a milled finish — it
+     registers as material without ever becoming something to look at. */
+  --weave-a:rgba(17,17,18,.022);      /* light theme: grooves are shadow */
+  --weave-wash:rgba(17,17,18,.030);
+}
+[data-theme="dark"]{
+  --weave-a:rgba(232,232,228,.020);   /* dark theme: grooves catch light */
+  --weave-wash:rgba(232,232,228,.045);
+}
+
+.panel,.card,.col,.pf,.kpi,
+.card-funnel,.plan,.insight,.step,.cmp-wrap,.tier,.mfig,
+.finding,.act-box,.stage-card,.bench,.fact,.narr,
+.drill,.pace,.blank,.ghost-head,.legend,
+.act,.privacy,.kpis,
+.sample,.notice,.addbar,.nudge,.prior,.note{
+  position:relative;
+  background-color:color-mix(in srgb,var(--panel,var(--card)) 90%,transparent);
+  background-image:
+    repeating-linear-gradient(102deg,var(--weave-a) 0 1px,transparent 1px 4px),
+    linear-gradient(160deg,var(--weave-wash),transparent 46%);
+  backdrop-filter:blur(14px) saturate(1.05);
+}
+
+/* Grain over the weave, clipped to the card. Without it the wash bands on the
+   larger surfaces, which is the same 8-bit stepping the orb has. */
+.panel::after,.card::after,.card-funnel::after,.plan::after,
+.finding::after,.stage-card::after,
+.act::after,.privacy::after,.sample::after,.narr::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size:200px 200px;opacity:.07;mix-blend-mode:multiply}
+[data-theme="dark"] .panel::after,[data-theme="dark"] .card::after,
+[data-theme="dark"] .card-funnel::after,[data-theme="dark"] .plan::after,
+[data-theme="dark"] .finding::after,[data-theme="dark"] .stage-card::after,
+[data-theme="dark"] .act::after,[data-theme="dark"] .privacy::after,
+[data-theme="dark"] .sample::after,[data-theme="dark"] .narr::after{
+  opacity:.20;mix-blend-mode:overlay}
+
+/* Content must sit above both pseudo-layers. */
+.panel > *,.card > *,.card-funnel > *,.plan > *,
+.finding > *,.stage-card > *,.act > *,
+.privacy > *,.sample > *,.narr > *{position:relative;z-index:1}
+

@@ -1,0 +1,2 @@
+company,job_title,applied_date,outcome,job_description,resume_version,source,first_response_date,screen_date,interview_date,final_round_date,offer_date,rejection_date,rejection_text,salary_posted,location
+Acme Corp,Senior Product Manager,2026-03-14,rejected,"We're looking for a PM with 5+ years and strong SQL...",Resume A,linkedin,2026-03-20,2026-03-25,,,,2026-04-02,"Thanks for interviewing. We've decided to move forward with a candidate who has deeper analytics experience.",,Remote

@@ -159,7 +159,8 @@ class Action:
     title: str
     why: str
     source: str              # observed | pattern | resume | targeting
-    effort: str              # "10 minutes" | "an hour" | "ongoing"
+    effort: str              # self-describing on screen: "takes 10 minutes",
+                             # "takes about an hour", "changes how you apply"
     done: bool = False
 
     def as_dict(self) -> dict:
@@ -189,7 +190,7 @@ def build_actions(observed, findings, roadmap_gaps, resume_lines,
                 title=f"Add a line about {skill} to your resume",
                 why=f"{count} employer{'s' if count > 1 else ''} named it in writing "
                     f"when they turned you down. This isn't our inference — it's theirs.",
-                source="observed", effort="10 minutes"))
+                source="observed", effort="takes 10 minutes"))
 
     # 2. A pattern that survived correction.
     for f in (findings or []):
@@ -210,7 +211,7 @@ def build_actions(observed, findings, roadmap_gaps, resume_lines,
             title="Stop applying to roles you don't match",
             why=f"You heard back from {rate_w*100:.0f}% of the roles you matched well "
                 f"and {rate_o*100:.0f}% of the ones you didn't. Same you, same resume.",
-            source="pattern", effort="ongoing"))
+            source="pattern", effort="changes how you apply"))
         break
 
     # 3. The most-demanded skill missing from the resume.
@@ -223,7 +224,7 @@ def build_actions(observed, findings, roadmap_gaps, resume_lines,
                 title=f"Put {skill} on your resume, or stop applying to roles that want it",
                 why=f"{n} of the jobs you applied to listed it as required. Right now "
                     f"you're competing for those without showing it.",
-                source="resume", effort="an hour"))
+                source="resume", effort="takes about an hour"))
 
     # 4. Fallback: the weakest resume line. Always something to do.
     if len(out) < 2:
@@ -234,7 +235,7 @@ def build_actions(observed, findings, roadmap_gaps, resume_lines,
                 title="Rewrite your weakest resume bullet",
                 why=f'"{orig[:70]}…" says what you did but not what changed because '
                     f'of it.',
-                source="resume", effort="10 minutes"))
+                source="resume", effort="takes 10 minutes"))
 
     return out[:limit]
 
